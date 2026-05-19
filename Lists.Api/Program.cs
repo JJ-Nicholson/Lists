@@ -1,7 +1,9 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Lists.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddListsDb();
 
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
