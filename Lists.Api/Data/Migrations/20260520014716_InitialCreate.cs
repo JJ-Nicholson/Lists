@@ -32,8 +32,7 @@ namespace Lists.Api.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Auth0UserId = table.Column<string>(type: "text", nullable: false),
-                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Email = table.Column<string>(type: "text", nullable: false)
+                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -102,12 +101,6 @@ namespace Lists.Api.Data.Migrations
                 name: "IX_Users_Auth0UserId",
                 table: "Users",
                 column: "Auth0UserId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
-                table: "Users",
-                column: "Email",
                 unique: true);
 
             migrationBuilder.CreateIndex(

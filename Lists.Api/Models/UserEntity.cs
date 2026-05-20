@@ -8,7 +8,5 @@ public class UserEntity
 
     public string? Username { get; set; }
 
-    public required string Email { get; set; }
-
     public List<ListAccessEntity> ListAccesses { get; set; } = [];
 }

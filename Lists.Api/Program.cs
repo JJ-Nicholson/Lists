@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Lists.Api.Data;
+using Lists.Api.Endpoints;
+using Lists.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddListsDb();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, Auth0UserContext>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
@@ -63,5 +68,7 @@ app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapAccountEndpoints();
 
 app.Run();

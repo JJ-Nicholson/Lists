@@ -110,10 +110,6 @@ namespace Lists.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Username")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -121,9 +117,6 @@ namespace Lists.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Auth0UserId")
-                        .IsUnique();
-
-                    b.HasIndex("Email")
                         .IsUnique();
 
                     b.HasIndex("Username")

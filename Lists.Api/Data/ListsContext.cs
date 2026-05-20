@@ -64,9 +64,5 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
         modelBuilder.Entity<UserEntity>()
             .HasIndex(u => u.Username)
             .IsUnique();
-
-        modelBuilder.Entity<UserEntity>()
-            .HasIndex(u => u.Email)
-            .IsUnique();
     }
 }
