@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Lists.Api.IntegrationTests/Lists.Api.IntegrationTests.csproj" />
   <Project Path="Lists.Api.UnitTests/Lists.Api.UnitTests.csproj" />
   <Project Path="Lists.Api/Lists.Api.csproj" />
 </Solution>

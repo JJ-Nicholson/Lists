@@ -5,6 +5,7 @@ using Lists.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddValidation();
 builder.AddListsDb();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, Auth0UserContext>();
