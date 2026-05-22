@@ -8,7 +8,7 @@ namespace Lists.Api.Endpoints;
 
 public static class AccountEndpoints
 {
-    public static void MapAccountEndpoints(this WebApplication app)
+    public static void MapAccountEndpoints(this WebApplication app, ILogger logger)
     {
         var accountGroup = app.MapGroup("/account").RequireAuthorization();
 
@@ -48,11 +48,14 @@ public static class AccountEndpoints
             {
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException exception)
             {
                 // Handles a race where another request takes the username after the pre-check.
+                logger.LogWarning(exception, "Username update conflicted for account {UserId}.", user.Id);
                 return Results.Conflict(new { message = "Username is already taken." });
             }
+
+            logger.LogInformation("Updated username for account {UserId}.", user.Id);
 
             return Results.Ok(ToAccountDto(user.Username));
         });
@@ -71,7 +74,7 @@ public static class AccountEndpoints
                 .Where(a => a.UserId == user.Id && a.Role == ListAccessRole.Owner)
                 .Select(a => a.ListId);
 
-            await dbContext.Lists
+            var deletedListCount = await dbContext.Lists
                 .Where(l => ownedListIds.Contains(l.Id))
                 .ExecuteDeleteAsync(cancellationToken);
 
@@ -80,6 +83,8 @@ public static class AccountEndpoints
                 .ExecuteDeleteAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
+
+            logger.LogInformation("Deleted account {UserId} and {DeletedListCount} owned lists.", user.Id, deletedListCount);
 
             return Results.NoContent();
         });

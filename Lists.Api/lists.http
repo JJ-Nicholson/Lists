@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:5180
+@accessToken = 
+
+### Get account
+GET {{baseUrl}}/account
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Set username before using list endpoints
+PATCH {{baseUrl}}/account
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "username": "1_"
+}
+
+###
+
+### Delete current account
+DELETE {{baseUrl}}/account
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get all accessible lists
+GET {{baseUrl}}/lists
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get a specific list
+GET {{baseUrl}}/lists/1
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Create a new list
+POST {{baseUrl}}/lists
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Josh's list"
+}
+
+###
+
+### Update a list name
+PATCH {{baseUrl}}/lists/1
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "A List with Items",
+  "version": 1235
+}
+
+###
+
+### Delete a list 
+DELETE {{baseUrl}}/lists/1?version=1236
+Authorization: Bearer {{accessToken}}

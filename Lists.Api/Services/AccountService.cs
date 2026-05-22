@@ -8,11 +8,16 @@ public class AccountService : IAccountService
 {
     private readonly ListsContext dbContext;
     private readonly IUserContext userContext;
+    private readonly ILogger<AccountService> logger;
 
-    public AccountService(ListsContext dbContext, IUserContext userContext)
+    public AccountService(
+        ListsContext dbContext,
+        IUserContext userContext,
+        ILogger<AccountService> logger)
     {
         this.dbContext = dbContext;
         this.userContext = userContext;
+        this.logger = logger;
     }
 
     public async Task<UserEntity> GetOrCreateCurrentUserAsync(CancellationToken cancellationToken = default)
@@ -32,6 +37,8 @@ public class AccountService : IAccountService
 
         dbContext.Users.Add(user);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("Created account {UserId}.", user.Id);
 
         return user;
     }

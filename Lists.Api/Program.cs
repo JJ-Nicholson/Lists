@@ -70,6 +70,9 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapAccountEndpoints();
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+
+app.MapAccountEndpoints(loggerFactory.CreateLogger("AccountEndpoints"));
+app.MapListsEndpoints();
 
 app.Run();

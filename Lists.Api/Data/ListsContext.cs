@@ -24,6 +24,15 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
             .HasConversion<string>();
 
         modelBuilder.Entity<ListEntity>()
+            .ToTable("Lists", table => table.HasCheckConstraint(
+                "CK_Lists_Name_NotEmpty",
+                "length(trim(\"Name\")) >= 1"));
+
+        modelBuilder.Entity<ListEntity>()
+            .Property(l => l.Name)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<ListEntity>()
             .HasMany(l => l.Items)
             .WithOne(i => i.List)
             .HasForeignKey(i => i.ListId)
@@ -46,8 +55,17 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
             .IsRowVersion();
 
         modelBuilder.Entity<ListItemEntity>()
+            .ToTable("ListItems", table => table.HasCheckConstraint(
+                "CK_ListItems_Name_NotEmpty",
+                "length(trim(\"Name\")) >= 1"));
+
+        modelBuilder.Entity<ListItemEntity>()
             .Property(i => i.Version)
             .IsRowVersion();
+
+        modelBuilder.Entity<ListItemEntity>()
+            .Property(i => i.Name)
+            .HasMaxLength(100);
 
         modelBuilder.Entity<ListItemEntity>()
             .Property(i => i.Price)

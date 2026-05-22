@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lists.Api.Data.Migrations
 {
     [DbContext(typeof(ListsContext))]
-    [Migration("20260520014716_InitialCreate")]
+    [Migration("20260522083612_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,7 +53,8 @@ namespace Lists.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
@@ -63,7 +64,10 @@ namespace Lists.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lists");
+                    b.ToTable("Lists", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Lists_Name_NotEmpty", "length(trim(\"Name\")) >= 1");
+                        });
                 });
 
             modelBuilder.Entity("Lists.Api.Models.ListItemEntity", b =>
@@ -82,7 +86,8 @@ namespace Lists.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
@@ -98,7 +103,10 @@ namespace Lists.Api.Data.Migrations
 
                     b.HasIndex("ListId");
 
-                    b.ToTable("ListItems");
+                    b.ToTable("ListItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ListItems_Name_NotEmpty", "length(trim(\"Name\")) >= 1");
+                        });
                 });
 
             modelBuilder.Entity("Lists.Api.Models.UserEntity", b =>

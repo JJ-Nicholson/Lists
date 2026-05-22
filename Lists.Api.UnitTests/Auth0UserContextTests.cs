@@ -6,6 +6,7 @@ namespace Lists.Api.UnitTests;
 
 public class Auth0UserContextTests
 {
+    // Verifies Auth0 user IDs can be read from the standard name identifier claim.
     [Fact]
     public void Constructor_WhenUserHasNameIdentifierClaim_SetsAuth0UserId()
     {
@@ -19,6 +20,7 @@ public class Auth0UserContextTests
         Assert.Equal("auth0|test-user", userContext.Auth0UserId);
     }
 
+    // Verifies Auth0 user IDs can be read from the JWT subject claim.
     [Fact]
     public void Constructor_WhenUserHasSubClaim_SetsAuth0UserId()
     {
@@ -32,6 +34,7 @@ public class Auth0UserContextTests
         Assert.Equal("auth0|test-user", userContext.Auth0UserId);
     }
 
+    // Verifies a principal with no authenticated identity is rejected before claim lookup.
     [Fact]
     public void Constructor_WhenUserIsNotAuthenticated_ThrowsUnauthorizedAccessException()
     {
@@ -45,6 +48,7 @@ public class Auth0UserContextTests
         Assert.Equal("An authenticated user is required.", exception.Message);
     }
 
+    // Verifies an authenticated principal is rejected when it has neither NameIdentifier nor sub.
     [Fact]
     public void Constructor_WhenUserIsMissingSubjectClaim_ThrowsUnauthorizedAccessException()
     {

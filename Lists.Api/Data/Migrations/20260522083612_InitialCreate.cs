@@ -17,12 +17,13 @@ namespace Lists.Api.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Lists", x => x.Id);
+                    table.CheckConstraint("CK_Lists_Name_NotEmpty", "length(trim(\"Name\")) >= 1");
                 });
 
             migrationBuilder.CreateTable(
@@ -45,7 +46,7 @@ namespace Lists.Api.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
@@ -54,6 +55,7 @@ namespace Lists.Api.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ListItems", x => x.Id);
+                    table.CheckConstraint("CK_ListItems_Name_NotEmpty", "length(trim(\"Name\")) >= 1");
                     table.ForeignKey(
                         name: "FK_ListItems_Lists_ListId",
                         column: x => x.ListId,
