@@ -1,7 +1,7 @@
 namespace Lists.Api.Dtos;
 
 public record ListsPageDto(
-    List<ListSummaryDto> Items,
+    IReadOnlyList<ListSummaryDto> Lists,
     PageDto Page
 );
 

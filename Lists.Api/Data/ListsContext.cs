@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using Lists.Api.Models;
 using ListEntity = Lists.Api.Models.ListEntity;
 
@@ -13,7 +14,6 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<ListAccessEntity>()

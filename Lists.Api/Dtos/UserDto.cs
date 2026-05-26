@@ -1,6 +1,6 @@
 namespace Lists.Api.Dtos;
 
-public record AccountDto(
+public record UserDto(
     string? Username,
     bool NeedsUsername
 );

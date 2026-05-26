@@ -1,7 +1,9 @@
 using System.Net.Http.Json;
+
+using Microsoft.Extensions.DependencyInjection;
+
 using Lists.Api.Data;
 using Lists.Api.Models;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lists.Api.IntegrationTests;
 
@@ -19,6 +21,24 @@ public static class IntegrationTestHelpers
         {
             Auth0UserId = auth0UserId,
             Username = username
+        };
+
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync();
+
+        return user;
+    }
+
+    public static async Task<UserEntity> SeedUserWithoutUsernameAsync(
+        ListsWebApplicationFactory factory,
+        string auth0UserId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ListsContext>();
+
+        var user = new UserEntity
+        {
+            Auth0UserId = auth0UserId
         };
 
         dbContext.Users.Add(user);
@@ -53,6 +73,31 @@ public static class IntegrationTestHelpers
         await dbContext.Entry(list).ReloadAsync();
 
         return list;
+    }
+
+    public static async Task<ListItemEntity> SeedItemAsync(
+        ListsWebApplicationFactory factory,
+        ListEntity list,
+        string name,
+        decimal price,
+        bool isCompleted = false)
+    {
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ListsContext>();
+
+        var item = new ListItemEntity
+        {
+            ListId = list.Id,
+            Name = name,
+            Price = price,
+            IsCompleted = isCompleted
+        };
+
+        dbContext.ListItems.Add(item);
+        await dbContext.SaveChangesAsync();
+        await dbContext.Entry(item).ReloadAsync();
+
+        return item;
     }
 
     public static HttpRequestMessage CreateAuthenticatedRequest(

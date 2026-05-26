@@ -1,14 +1,14 @@
 @baseUrl = http://localhost:5180
-@accessToken = 
+@accessToken =
 
-### Get account
-GET {{baseUrl}}/account
+### Get user
+GET {{baseUrl}}/user
 Authorization: Bearer {{accessToken}}
 
 ###
 
 ### Set username before using list endpoints
-PATCH {{baseUrl}}/account
+PATCH {{baseUrl}}/user
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -18,8 +18,8 @@ Content-Type: application/json
 
 ###
 
-### Delete current account
-DELETE {{baseUrl}}/account
+### Delete current user account
+DELETE {{baseUrl}}/user
 Authorization: Bearer {{accessToken}}
 
 ###
@@ -59,6 +59,6 @@ Content-Type: application/json
 
 ###
 
-### Delete a list 
+### Delete a list
 DELETE {{baseUrl}}/lists/1?version=1236
 Authorization: Bearer {{accessToken}}

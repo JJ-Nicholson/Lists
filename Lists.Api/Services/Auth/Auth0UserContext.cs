@@ -1,6 +1,11 @@
 using System.Security.Claims;
 
-namespace Lists.Api.Services;
+namespace Lists.Api.Services.Auth;
+
+public interface IUserContext
+{
+    string Auth0UserId { get; }
+}
 
 public class Auth0UserContext : IUserContext
 {

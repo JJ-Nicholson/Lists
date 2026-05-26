@@ -4,5 +4,5 @@ public record ListDto(
     int Id,
     string Name,
     uint Version,
-    List<ItemDto> Items
+    IReadOnlyList<ItemDto> Items
 );

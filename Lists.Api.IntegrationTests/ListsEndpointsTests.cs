@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+
 using FluentAssertions;
+
 using Lists.Api.Dtos;
+
 using static Lists.Api.IntegrationTests.IntegrationTestHelpers;
 
 namespace Lists.Api.IntegrationTests;
@@ -45,16 +48,16 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var page = await response.Content.ReadFromJsonAsync<ListsPageDto>();
         page.Should().NotBeNull();
-        page.Items.Should().BeEmpty();
+        page.Lists.Should().BeEmpty();
         page.Page.Page.Should().Be(1);
         page.Page.PageSize.Should().Be(96);
         page.Page.TotalCount.Should().Be(0);
         page.Page.TotalPages.Should().Be(0);
     }
 
-    // Verifies list search, descending name sort, and pagination metadata work together.
+    // Verifies list search, descending name ordering, and pagination metadata work together.
     [Fact]
-    public async Task GetLists_WhenSearchSortAndPaginationAreSpecified_ReturnsMatchingPage()
+    public async Task GetLists_WhenSearchSortDirectionAndPaginationAreSpecified_ReturnsMatchingPage()
     {
         // Arrange
         var auth0UserId = CreateAuth0UserId();
@@ -66,7 +69,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         using var request = CreateAuthenticatedRequest(
             HttpMethod.Get,
-            "/lists?search=groceries&sortBy=name&sortDirection=desc&page=1&pageSize=1",
+            "/lists?search=groceries&sortDirection=desc&page=1&pageSize=1",
             auth0UserId);
 
         // Act
@@ -77,8 +80,8 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var page = await response.Content.ReadFromJsonAsync<ListsPageDto>();
         page.Should().NotBeNull();
-        page.Items.Should().ContainSingle();
-        page.Items[0].Name.Should().Be("Gamma Groceries");
+        page.Lists.Should().ContainSingle();
+        page.Lists[0].Name.Should().Be("Gamma Groceries");
         page.Page.Page.Should().Be(1);
         page.Page.PageSize.Should().Be(1);
         page.Page.TotalCount.Should().Be(2);
@@ -104,7 +107,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var page = await response.Content.ReadFromJsonAsync<ListsPageDto>();
         page.Should().NotBeNull();
-        page.Items.Should().BeEmpty();
+        page.Lists.Should().BeEmpty();
         page.Page.TotalCount.Should().Be(0);
     }
 
@@ -112,7 +115,6 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
     [Theory]
     [InlineData("/lists?page=0", "Page must be 1 or greater.")]
     [InlineData("/lists?pageSize=0", "Page size must be between 1 and 1000.")]
-    [InlineData("/lists?sortBy=created", "Invalid list sort.")]
     [InlineData("/lists?sortDirection=sideways", "Invalid list sort direction.")]
     public async Task GetLists_WhenQueryIsInvalid_ReturnsBadRequest(string requestUri, string message)
     {
@@ -435,7 +437,10 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         object? body)
     {
         // Arrange
-        using var request = CreateAuthenticatedRequest(method, requestUri, CreateAuth0UserId());
+        var auth0UserId = CreateAuth0UserId();
+        await SeedUserWithoutUsernameAsync(factory, auth0UserId);
+
+        using var request = CreateAuthenticatedRequest(method, requestUri, auth0UserId);
 
         if (body is not null)
         {

@@ -1,6 +1,8 @@
 using System.Security.Claims;
-using Lists.Api.Services;
+
 using Microsoft.AspNetCore.Http;
+
+using Lists.Api.Services.Auth;
 
 namespace Lists.Api.UnitTests;
 

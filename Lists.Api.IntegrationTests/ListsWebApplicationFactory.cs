@@ -1,4 +1,3 @@
-using Lists.Api.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -7,7 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
 using Testcontainers.PostgreSql;
+
+using Lists.Api.Data;
 
 namespace Lists.Api.IntegrationTests;
 
@@ -80,5 +82,4 @@ public class ListsWebApplicationFactory : WebApplicationFactory<Program>, IAsync
         await dbContext.Lists.ExecuteDeleteAsync();
         await dbContext.Users.ExecuteDeleteAsync();
     }
-
 }
