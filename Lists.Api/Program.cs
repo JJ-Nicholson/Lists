@@ -8,6 +8,7 @@ using Lists.Api.Endpoints.Users;
 using Lists.Api.Endpoints.Lists;
 using Lists.Api.Endpoints.ListItems;
 using Lists.Api.Endpoints.ListAccessEntries;
+using Lists.Api.Endpoints.Health;
 
 using Lists.Api.Services.Users;
 using Lists.Api.Services.Lists;
@@ -107,6 +108,7 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthEndpoints();
 app.MapUsersEndpoints();
 app.MapListsEndpoints();
 app.MapListItemsEndpoints();

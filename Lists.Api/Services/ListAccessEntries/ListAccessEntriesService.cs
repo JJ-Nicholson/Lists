@@ -17,7 +17,7 @@ public interface IListAccessEntriesService
     Task<IReadOnlyList<ListAccessEntryProjection>> GetListAccessEntriesAsync(
         int listId,
         CancellationToken cancellationToken);
-        
+
     Task RevokeAccessAsync(int listId, string targetUsername, CancellationToken cancellationToken);
 }
 
