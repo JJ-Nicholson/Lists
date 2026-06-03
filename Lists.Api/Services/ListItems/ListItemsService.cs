@@ -10,7 +10,7 @@ namespace Lists.Api.Services.ListItems;
 
 public interface IListItemsService
 {
-    Task<ListItemEntity> CreateListItemEntityAsync(
+    Task CreateListItemEntityAsync(
         int listId,
         string itemName,
         decimal itemPrice,
@@ -39,7 +39,7 @@ public class ListItemsService(
     IUsersService userService
 ) : IListItemsService
 {
-    public async Task<ListItemEntity> CreateListItemEntityAsync(
+    public async Task CreateListItemEntityAsync(
         int listId,
         string itemName,
         decimal itemPrice,
@@ -52,7 +52,7 @@ public class ListItemsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -65,16 +65,14 @@ public class ListItemsService(
         var newItem = new ListItemEntity
         {
             ListId = listId,
-            Name = itemName,
+            Name = itemName.Trim(),
             Price = itemPrice,
             IsCompleted = false
         };
 
-        newItem = unitOfWork.ListItems.CreateListItemEntity(newItem);
+        unitOfWork.ListItems.CreateListItemEntity(newItem);
 
         await unitOfWork.SaveAsync(cancellationToken);
-
-        return newItem;
     }
 
     public async Task<IReadOnlyList<ListItemEntity>> UpdateItemEntitiesCompletionAsync(
@@ -90,7 +88,7 @@ public class ListItemsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -171,7 +169,7 @@ public class ListItemsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -189,7 +187,7 @@ public class ListItemsService(
         }
 
         unitOfWork.ListItems.SetListItemEntityOriginalVersion(item, version);
-        item.Name = name;
+        item.Name = name.Trim();
         item.Price = price;
         item.IsCompleted = isCompleted;
 
@@ -217,7 +215,7 @@ public class ListItemsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);

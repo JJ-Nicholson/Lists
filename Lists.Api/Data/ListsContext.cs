@@ -9,17 +9,22 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
 {
     public DbSet<ListEntity> Lists => Set<ListEntity>();
     public DbSet<ListItemEntity> ListItems => Set<ListItemEntity>();
-    public DbSet<ListAccessEntity> ListAccesses => Set<ListAccessEntity>();
+    public DbSet<ListAccessEntryEntity> ListAccesses => Set<ListAccessEntryEntity>();
     public DbSet<UserEntity> Users => Set<UserEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<ListAccessEntity>()
+        modelBuilder.Entity<ListAccessEntryEntity>()
             .HasKey(a => new { a.ListId, a.UserId });
 
-        modelBuilder.Entity<ListAccessEntity>()
+        modelBuilder.Entity<ListAccessEntryEntity>()
+            .ToTable("ListAccesses", table => table.HasCheckConstraint(
+                "CK_ListAccesses_Role_Valid",
+                "\"Role\" IN ('Owner', 'Editor')"));
+
+        modelBuilder.Entity<ListAccessEntryEntity>()
             .Property(a => a.Role)
             .HasConversion<string>();
 
@@ -70,6 +75,11 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
         modelBuilder.Entity<ListItemEntity>()
             .Property(i => i.Price)
             .HasPrecision(10, 2);
+
+        modelBuilder.Entity<UserEntity>()
+            .ToTable("Users", table => table.HasCheckConstraint(
+                "CK_Users_Username_Valid",
+                "\"Username\" IS NULL OR \"Username\" ~ '^[a-z0-9][a-z0-9_-]{1,49}$'"));
 
         modelBuilder.Entity<UserEntity>()
             .Property(u => u.Username)

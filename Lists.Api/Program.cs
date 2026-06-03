@@ -7,15 +7,18 @@ using Lists.Api.Services.Auth;
 using Lists.Api.Endpoints.Users;
 using Lists.Api.Endpoints.Lists;
 using Lists.Api.Endpoints.ListItems;
+using Lists.Api.Endpoints.ListAccessEntries;
 
 using Lists.Api.Services.Users;
 using Lists.Api.Services.Lists;
 using Lists.Api.Services.ListItems;
+using Lists.Api.Services.ListAccessEntries;
 
 using Lists.Api.Repositories;
 using Lists.Api.Repositories.Users;
 using Lists.Api.Repositories.Lists;
 using Lists.Api.Repositories.ListItems;
+using Lists.Api.Repositories.ListAccessEntries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +42,9 @@ builder.Services.AddScoped<IListsService, ListsService>();
 
 builder.Services.AddScoped<IListItemsRepository, ListItemsRepository>();
 builder.Services.AddScoped<IListItemsService, ListItemsService>();
+
+builder.Services.AddScoped<IListAccessEntriesRepository, ListAccessEntriesRepository>();
+builder.Services.AddScoped<IListAccessEntriesService, ListAccessEntriesService>();
 
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
@@ -104,5 +110,6 @@ app.UseAuthorization();
 app.MapUsersEndpoints();
 app.MapListsEndpoints();
 app.MapListItemsEndpoints();
+app.MapListAccessEntriesEndpoints();
 
 app.Run();

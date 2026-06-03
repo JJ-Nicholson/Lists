@@ -7,7 +7,7 @@ namespace Lists.Api.Repositories.ListItems;
 
 public interface IListItemsRepository
 {
-    ListItemEntity CreateListItemEntity(ListItemEntity listItem);
+    void CreateListItemEntity(ListItemEntity listItem);
 
     Task<IReadOnlyList<ListItemEntity>> GetListItemEntitiesAsync(
         int listId,
@@ -21,10 +21,9 @@ public interface IListItemsRepository
 
 public class ListItemsRepository(ListsContext dbContext) : IListItemsRepository
 {
-    public ListItemEntity CreateListItemEntity(ListItemEntity listItem)
+    public void CreateListItemEntity(ListItemEntity listItem)
     {
         dbContext.ListItems.Add(listItem);
-        return listItem;
     }
 
     public async Task<IReadOnlyList<ListItemEntity>> GetListItemEntitiesAsync(

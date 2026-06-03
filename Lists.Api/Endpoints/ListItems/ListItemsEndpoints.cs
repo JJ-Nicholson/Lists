@@ -18,17 +18,14 @@ public static class ListItemsEndpoints
             IListItemsService listItemsService,
             CancellationToken cancellationToken) =>
         {
-            var newItem = await listItemsService.CreateListItemEntityAsync(
+            await listItemsService.CreateListItemEntityAsync(
                 listId,
                 dto.Name,
                 dto.Price,
                 cancellationToken);
 
-            // No created at location is returned since there is no endpoint to get a specific item.
-            // The frontend does not redirect either, after creating an item, so this works well.
-            return Results.Json(
-                ToItemDto(newItem),
-                statusCode: StatusCodes.Status201Created);
+            // The frontend refetches after creating an item, so no item representation is needed.
+            return Results.NoContent();
         });
 
         // PATCH /lists/{listId}/items/mark-complete (marks all passed items as complete)

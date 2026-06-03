@@ -21,7 +21,7 @@ namespace Lists.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Lists.Api.Models.ListAccessEntity", b =>
+            modelBuilder.Entity("Lists.Api.Models.ListAccessEntryEntity", b =>
                 {
                     b.Property<int>("ListId")
                         .HasColumnType("integer");
@@ -37,7 +37,10 @@ namespace Lists.Api.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ListAccesses");
+                    b.ToTable("ListAccesses", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ListAccesses_Role_Valid", "\"Role\" IN ('Owner', 'Editor')");
+                        });
                 });
 
             modelBuilder.Entity("Lists.Api.Models.ListEntity", b =>
@@ -130,10 +133,13 @@ namespace Lists.Api.Data.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Users_Username_Valid", "\"Username\" IS NULL OR \"Username\" ~ '^[a-z0-9][a-z0-9_-]{1,49}$'");
+                        });
                 });
 
-            modelBuilder.Entity("Lists.Api.Models.ListAccessEntity", b =>
+            modelBuilder.Entity("Lists.Api.Models.ListAccessEntryEntity", b =>
                 {
                     b.HasOne("Lists.Api.Models.ListEntity", "List")
                         .WithMany("AccessEntries")

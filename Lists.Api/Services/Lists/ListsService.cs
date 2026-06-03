@@ -111,7 +111,7 @@ public class ListsService(
             throw new BadRequestException("Invalid item sort direction.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -150,10 +150,10 @@ public class ListsService(
 
         var list = new ListEntity
         {
-            Name = listName,
+            Name = listName.Trim(),
             AccessEntries =
             [
-                new ListAccessEntity
+                new ListAccessEntryEntity
                 {
                     UserId = currentUser.Id,
                     Role = ListAccessRole.Owner
@@ -181,7 +181,7 @@ public class ListsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -198,7 +198,7 @@ public class ListsService(
             throw new NotFoundException("List not found.");
         }
 
-        list.Name = newName;
+        list.Name = newName.Trim();
 
         try
         {
@@ -220,7 +220,7 @@ public class ListsService(
             throw new ConflictException("Choose a username before using lists.");
         }
 
-        var hasListAccess = await unitOfWork.Lists.HasListAccessAsync(
+        var hasListAccess = await unitOfWork.ListAccessEntries.HasListAccessAsync(
             listId,
             currentUser.Id,
             cancellationToken);
@@ -230,7 +230,7 @@ public class ListsService(
             throw new NotFoundException("List not found.");
         }
 
-        var isOwner = await unitOfWork.Lists.IsListOwnerAsync(
+        var isOwner = await unitOfWork.ListAccessEntries.IsListOwnerAsync(
             listId,
             currentUser.Id,
             cancellationToken);

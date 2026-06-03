@@ -50,16 +50,56 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
         using var response = await client.SendAsync(request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         response.Headers.Location.Should().BeNull();
 
-        var createdItem = await response.Content.ReadFromJsonAsync<ItemDto>();
-        createdItem.Should().NotBeNull();
-        createdItem!.Name.Should().Be("Milk");
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().BeEmpty();
+
+        using var getRequest = CreateAuthenticatedRequest(HttpMethod.Get, $"/lists/{list.Id}", auth0UserId);
+        using var getResponse = await client.SendAsync(getRequest);
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var listPage = await getResponse.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        listPage.Should().NotBeNull();
+        var createdItem = listPage!.Items.Should().ContainSingle().Which;
+        createdItem.Name.Should().Be("Milk");
         createdItem.Price.Should().Be(4.50m);
         createdItem.IsCompleted.Should().BeFalse();
         createdItem.Version.Should().BeGreaterThan(0u);
+    }
+
+    // Verifies editors can add items to lists shared with them.
+    [Fact]
+    public async Task PostItem_WhenUserHasAccessToSharedList_CreatesItem()
+    {
+        // Arrange
+        var owner = await SeedUserAsync(factory, CreateAuth0UserId(), CreateUsername());
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, owner, "Shared Groceries");
+        await SeedListAccessAsync(factory, list, currentUser);
+
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Post,
+            $"/lists/{list.Id}/items",
+            auth0UserId,
+            new { Name = "Milk", Price = 4.50m });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        using var getRequest = CreateAuthenticatedRequest(HttpMethod.Get, $"/lists/{list.Id}", auth0UserId);
+        using var getResponse = await client.SendAsync(getRequest);
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var listPage = await getResponse.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        listPage.Should().NotBeNull();
+        listPage!.Items.Should().ContainSingle(i => i.Name == "Milk" && i.Price == 4.50m);
     }
 
     // Verifies item creation rejects invalid item payloads through DTO validation.

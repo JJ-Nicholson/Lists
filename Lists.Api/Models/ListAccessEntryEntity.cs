@@ -1,6 +1,6 @@
 namespace Lists.Api.Models;
 
-public class ListAccessEntity
+public class ListAccessEntryEntity
 {
     public int ListId { get; set; }
     public int UserId { get; set; }

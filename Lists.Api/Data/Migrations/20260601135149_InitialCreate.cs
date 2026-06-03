@@ -38,6 +38,7 @@ namespace Lists.Api.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.CheckConstraint("CK_Users_Username_Valid", "\"Username\" IS NULL OR \"Username\" ~ '^[a-z0-9][a-z0-9_-]{1,49}$'");
                 });
 
             migrationBuilder.CreateTable(
@@ -75,6 +76,7 @@ namespace Lists.Api.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ListAccesses", x => new { x.ListId, x.UserId });
+                    table.CheckConstraint("CK_ListAccesses_Role_Valid", "\"Role\" IN ('Owner', 'Editor')");
                     table.ForeignKey(
                         name: "FK_ListAccesses_Lists_ListId",
                         column: x => x.ListId,

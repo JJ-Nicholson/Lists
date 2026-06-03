@@ -60,7 +60,7 @@ public static class IntegrationTestHelpers
             Name = name,
             AccessEntries =
             [
-                new ListAccessEntity
+                new ListAccessEntryEntity
                 {
                     UserId = owner.Id,
                     Role = ListAccessRole.Owner
@@ -73,6 +73,28 @@ public static class IntegrationTestHelpers
         await dbContext.Entry(list).ReloadAsync();
 
         return list;
+    }
+
+    public static async Task<ListAccessEntryEntity> SeedListAccessAsync(
+        ListsWebApplicationFactory factory,
+        ListEntity list,
+        UserEntity user,
+        ListAccessRole role = ListAccessRole.Editor)
+    {
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ListsContext>();
+
+        var accessEntry = new ListAccessEntryEntity
+        {
+            ListId = list.Id,
+            UserId = user.Id,
+            Role = role
+        };
+
+        dbContext.ListAccesses.Add(accessEntry);
+        await dbContext.SaveChangesAsync();
+
+        return accessEntry;
     }
 
     public static async Task<ListItemEntity> SeedItemAsync(

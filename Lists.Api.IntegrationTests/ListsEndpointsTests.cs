@@ -111,6 +111,34 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         page.Page.TotalCount.Should().Be(0);
     }
 
+    // Verifies list collection results include lists shared with the current user.
+    [Fact]
+    public async Task GetLists_WhenUserHasAccessToSharedList_ReturnsSharedList()
+    {
+        // Arrange
+        var owner = await SeedUserAsync(factory, CreateAuth0UserId(), CreateUsername());
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, owner, "Shared Groceries");
+        await SeedListAccessAsync(factory, list, currentUser);
+
+        using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/lists", auth0UserId);
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var page = await response.Content.ReadFromJsonAsync<ListsPageDto>();
+        page.Should().NotBeNull();
+        var sharedList = page!.Lists.Should().ContainSingle().Which;
+        sharedList.Id.Should().Be(list.Id);
+        sharedList.Name.Should().Be("Shared Groceries");
+        sharedList.CurrentUserRole.Should().Be("editor");
+        sharedList.OwnerUsername.Should().Be(owner.Username);
+    }
+
     // Verifies invalid list collection query parameters return clear bad request responses.
     [Theory]
     [InlineData("/lists?page=0", "Page must be 1 or greater.")]
@@ -426,6 +454,32 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    // Verifies editors can see a shared list but cannot delete it.
+    [Fact]
+    public async Task DeleteList_WhenCurrentUserIsEditor_ReturnsForbidden()
+    {
+        // Arrange
+        var owner = await SeedUserAsync(factory, CreateAuth0UserId(), CreateUsername());
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, owner, "Shared Groceries");
+        await SeedListAccessAsync(factory, list, currentUser);
+
+        using var request = CreateAuthenticatedRequest(
+            HttpMethod.Delete,
+            $"/lists/{list.Id}?version={list.Version}",
+            auth0UserId);
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Only list owners can delete lists.");
     }
 
     // Verifies list endpoints reject accounts that have not chosen a username yet.

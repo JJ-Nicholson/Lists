@@ -8,9 +8,6 @@ namespace Lists.Api.Repositories.Lists;
 
 public interface IListsRepository
 {
-    Task<bool> HasListAccessAsync(int listId, int userId, CancellationToken cancellationToken);
-    Task<bool> IsListOwnerAsync(int listId, int userId, CancellationToken cancellationToken);
-
     Task<ListSummariesPageProjection> GetListSummariesPageAsync(
         int currentUserId,
         string? search,
@@ -55,23 +52,6 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
             .Replace("\\", "\\\\")
             .Replace("%", "\\%")
             .Replace("_", "\\_");
-    }
-
-    public Task<bool> HasListAccessAsync(int listId, int userId, CancellationToken cancellationToken)
-    {
-        return dbContext.ListAccesses.AnyAsync(a =>
-            a.ListId == listId &&
-            a.UserId == userId,
-            cancellationToken);
-    }
-
-    public Task<bool> IsListOwnerAsync(int listId, int userId, CancellationToken cancellationToken)
-    {
-        return dbContext.ListAccesses.AnyAsync(a =>
-            a.ListId == listId &&
-            a.UserId == userId &&
-            a.Role == ListAccessRole.Owner,
-            cancellationToken);
     }
 
     public async Task<ListSummariesPageProjection> GetListSummariesPageAsync(
