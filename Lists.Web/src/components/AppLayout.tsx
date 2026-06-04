@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router";
+
 import { scrollToPageTop } from "../navigation/scroll";
-import Header from "./Header";
 import Footer from "./Footer";
+import Header from "./Header";
 
 function getPageVariant(pathname: string) {
     if (pathname === "/") return "home";

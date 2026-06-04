@@ -1,9 +1,40 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import type { ReactElement } from "react";
+import { useLocation } from "react-router";
+
 import { Button } from "./Button";
 
-function getReturnTo(): string {
-    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+type ReturnToLocation = {
+    pathname?: unknown;
+    search?: unknown;
+    hash?: unknown;
+};
+
+type ReturnToState = {
+    returnTo?: ReturnToLocation;
+};
+
+function getLocationPath(location: ReturnToLocation): string | undefined {
+    if (typeof location.pathname !== "string") {
+        return undefined;
+    }
+
+    const search = typeof location.search === "string" ? location.search : "";
+    const hash = typeof location.hash === "string" ? location.hash : "";
+
+    return `${location.pathname}${search}${hash}`;
+}
+
+function getReturnTo(locationState: unknown): string {
+    const state = locationState as ReturnToState | null;
+    const savedReturnTo = state?.returnTo
+        ? getLocationPath(state.returnTo)
+        : undefined;
+
+    return (
+        savedReturnTo ??
+        `${window.location.pathname}${window.location.search}${window.location.hash}`
+    );
 }
 
 export default function Header(): ReactElement {
@@ -13,16 +44,17 @@ export default function Header(): ReactElement {
         loginWithRedirect,
         logout: auth0Logout,
     } = useAuth0();
+    const location = useLocation();
 
     function login(): void {
         loginWithRedirect({
-            appState: { returnTo: getReturnTo() },
+            appState: { returnTo: getReturnTo(location.state) },
         });
     }
 
     function signup(): void {
         loginWithRedirect({
-            appState: { returnTo: getReturnTo() },
+            appState: { returnTo: getReturnTo(location.state) },
             authorizationParams: { screen_hint: "signup" },
         });
     }
@@ -35,7 +67,6 @@ export default function Header(): ReactElement {
 
     return (
         <header className="site-header">
-
             <nav className="site-header__nav" aria-label="Primary">
                 {isLoading ? (
                     <Button disabled variant="header">
