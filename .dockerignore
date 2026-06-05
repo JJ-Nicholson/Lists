@@ -1,0 +1,33 @@
+.git
+.github
+.DS_Store
+
+# .NET build output
+**/bin
+**/obj
+
+# Node / Vite build output
+Lists.Web/node_modules
+Lists.Web/dist
+
+# Tests / coverage
+**/TestResults
+coverage
+.coverage
+*.trx
+*.coverage
+*.coveragexml
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*
+!*.env.example
