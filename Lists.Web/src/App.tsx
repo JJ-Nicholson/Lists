@@ -8,12 +8,15 @@ import HomePage from "./pages/HomePage";
 import ListPage from "./pages/ListPage";
 import ListsPage from "./pages/ListsPage";
 import SetupProfilePage from "./pages/SetupProfilePage";
+import PrivacyPage from "./pages/PrivacyPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
     return (
         <Routes>
             <Route element={<AppLayout />}>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route element={<RequireAuth />}>
                     <Route path="/setup-profile" element={<SetupProfilePage />} />
@@ -22,6 +25,7 @@ export default function App() {
                         <Route path="/lists/:listId" element={<ListPage />} />
                     </Route>
                 </Route>
+                <Route path="*" element={<NotFoundPage />} />
             </Route>
         </Routes>
     );

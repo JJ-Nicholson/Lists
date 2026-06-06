@@ -18,6 +18,7 @@ public interface IUsersService
 public class UsersService(
     IUnitOfWork unitOfWork,
     IUserContext userContext,
+    IAuth0ManagementService auth0ManagementService,
     ILogger<UsersService> logger
 ) : IUsersService
 {
@@ -84,6 +85,9 @@ public class UsersService(
     public async Task DeleteCurrentUserEntityAsync(CancellationToken cancellationToken)
     {
         var user = await GetCurrentUserEntityAsync(cancellationToken);
+        var auth0UserId = user.Auth0UserId;
+
+        await auth0ManagementService.DeleteUserAsync(auth0UserId, cancellationToken);
 
         var deletedListCount = await unitOfWork.Lists.DeleteOwnedListEntitiesAsync(user.Id, cancellationToken);
 

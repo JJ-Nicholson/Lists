@@ -183,6 +183,7 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         // Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        factory.GetDeletedAuth0UserIds().Should().Equal(auth0UserId);
 
         using var getRequest = CreateAuthenticatedRequest(HttpMethod.Get, "/user", auth0UserId);
         using var getResponse = await client.SendAsync(getRequest);

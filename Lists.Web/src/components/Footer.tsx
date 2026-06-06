@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 const githubUrl = "https://github.com/JJ-Nicholson/Lists";
 
 export default function Footer() {
@@ -6,6 +8,7 @@ export default function Footer() {
             <p>Plan Together</p>
 
             <nav className="site-footer__nav" aria-label="Footer">
+                <Link to="/privacy">Privacy</Link>
                 <a
                     className="site-footer__icon-link"
                     href={githubUrl}

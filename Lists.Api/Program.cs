@@ -32,6 +32,7 @@ builder.Services.AddValidation();
 builder.AddListsDb();
 
 builder.Services.AddScoped<IUserContext, Auth0UserContext>();
+builder.Services.AddHttpClient<IAuth0ManagementService, Auth0ManagementService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -78,6 +79,31 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+
+var auth0ManagementAudience = builder.Configuration["Auth0:ManagementAudience"];
+var auth0ManagementClientId = builder.Configuration["Auth0:ManagementClientId"];
+var auth0ManagementClientSecret = builder.Configuration["Auth0:ManagementClientSecret"];
+
+if (string.IsNullOrWhiteSpace(auth0ManagementAudience))
+{
+    throw new InvalidOperationException("Auth0:ManagementAudience must be configured.");
+}
+
+if (string.IsNullOrWhiteSpace(auth0ManagementClientId))
+{
+    throw new InvalidOperationException("Auth0:ManagementClientId must be configured.");
+}
+
+if (string.IsNullOrWhiteSpace(auth0ManagementClientSecret))
+{
+    throw new InvalidOperationException("Auth0:ManagementClientSecret must be configured.");
+}
+
+builder.Services.AddSingleton(new Auth0ManagementConfig(
+    new Uri(auth0Authority),
+    auth0ManagementAudience,
+    auth0ManagementClientId,
+    auth0ManagementClientSecret));
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")

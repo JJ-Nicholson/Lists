@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 
 using Lists.Api.Data;
+using Lists.Api.Services.Auth;
 
 namespace Lists.Api.IntegrationTests;
 
@@ -30,6 +31,9 @@ public class ListsWebApplicationFactory : WebApplicationFactory<Program>, IAsync
             {
                 ["Auth0:Domain"] = "test.auth0.local",
                 ["Auth0:Audience"] = "test-api",
+                ["Auth0:ManagementAudience"] = "https://test.auth0.local/api/v2/",
+                ["Auth0:ManagementClientId"] = "test-client-id",
+                ["Auth0:ManagementClientSecret"] = "test-client-secret",
                 ["Cors:AllowedOrigins:0"] = "http://localhost"
             });
         });
@@ -37,11 +41,16 @@ public class ListsWebApplicationFactory : WebApplicationFactory<Program>, IAsync
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<DbContextOptions<ListsContext>>();
+            services.RemoveAll<IAuth0ManagementService>();
 
             services.AddDbContext<ListsContext>(options =>
             {
                 options.UseNpgsql(_postgresqlContainer.GetConnectionString());
             });
+
+            services.AddSingleton<TestAuth0ManagementService>();
+            services.AddSingleton<IAuth0ManagementService>(serviceProvider =>
+                serviceProvider.GetRequiredService<TestAuth0ManagementService>());
 
             services
                 .AddAuthentication(IntegrationTestAuthHandler.AuthenticationScheme)
@@ -76,10 +85,22 @@ public class ListsWebApplicationFactory : WebApplicationFactory<Program>, IAsync
         using var scope = Services.CreateScope();
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ListsContext>();
+        var auth0ManagementService = scope.ServiceProvider.GetRequiredService<TestAuth0ManagementService>();
+
+        auth0ManagementService.Reset();
 
         await dbContext.ListAccesses.ExecuteDeleteAsync();
         await dbContext.ListItems.ExecuteDeleteAsync();
         await dbContext.Lists.ExecuteDeleteAsync();
         await dbContext.Users.ExecuteDeleteAsync();
+    }
+
+    public IReadOnlyList<string> GetDeletedAuth0UserIds()
+    {
+        using var scope = Services.CreateScope();
+
+        var auth0ManagementService = scope.ServiceProvider.GetRequiredService<TestAuth0ManagementService>();
+
+        return auth0ManagementService.DeletedUserIds.ToList();
     }
 }
