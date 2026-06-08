@@ -11,6 +11,10 @@ namespace Lists.Api.IntegrationTests;
 
 public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IAsyncLifetime
 {
+    private const string TooLongListName =
+        "this-list-name-is-far-too-long-because-it-keeps-going-past-the-one-hundred-character-limit-for-list-validation";
+    private const string TooLongUnitLabel = "this-unit-label-is-far-too-long";
+
     private readonly ListsWebApplicationFactory factory;
     private readonly HttpClient client;
 
@@ -119,7 +123,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         var owner = await SeedUserAsync(factory, CreateAuth0UserId(), CreateUsername());
         var auth0UserId = CreateAuth0UserId();
         var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
-        var list = await SeedListAsync(factory, owner, "Shared Groceries");
+        var list = await SeedListAsync(factory, owner, "Shared Groceries", "NZD");
         await SeedListAccessAsync(factory, list, currentUser);
 
         using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/lists", auth0UserId);
@@ -135,6 +139,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         var sharedList = page!.Lists.Should().ContainSingle().Which;
         sharedList.Id.Should().Be(list.Id);
         sharedList.Name.Should().Be("Shared Groceries");
+        sharedList.UnitLabel.Should().Be("NZD");
         sharedList.CurrentUserRole.Should().Be("editor");
         sharedList.OwnerUsername.Should().Be(owner.Username);
     }
@@ -168,7 +173,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         // Arrange
         var auth0UserId = CreateAuth0UserId();
         var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
-        var list = await SeedListAsync(factory, currentUser, "Groceries");
+        var list = await SeedListAsync(factory, currentUser, "Groceries", "NZD");
         using var request = CreateAuthenticatedRequest(HttpMethod.Get, $"/lists/{list.Id}", auth0UserId);
 
         // Act
@@ -177,17 +182,44 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var listPage = await response.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        var listPage = await response.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
         listPage.Id.Should().Be(list.Id);
         listPage.Name.Should().Be("Groceries");
+        listPage.UnitLabel.Should().Be("NZD");
         listPage.Version.Should().Be(list.Version);
         listPage.Items.Should().BeEmpty();
-        listPage.ItemsPage.Page.Should().Be(1);
-        listPage.ItemsPage.PageSize.Should().Be(96);
-        listPage.ItemsPage.TotalCount.Should().Be(0);
-        listPage.ItemsPage.TotalPages.Should().Be(0);
-        listPage.TotalPrice.Should().Be(0);
+        listPage.TotalAmount.Should().Be(0);
+    }
+
+    // Verifies list details return all matching items.
+    [Fact]
+    public async Task GetList_WhenItemsMatchFilters_ReturnsMatchingItems()
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, currentUser, "Groceries");
+        await SeedItemAsync(factory, list, "Milk", 4.50m);
+        await SeedItemAsync(factory, list, "Bread", 3.25m);
+        await SeedItemAsync(factory, list, "Muesli", 8.10m, isCompleted: true);
+
+        using var request = CreateAuthenticatedRequest(
+            HttpMethod.Get,
+            $"/lists/{list.Id}?status=active&sortBy=amount&sortDirection=desc&page=1&pageSize=1",
+            auth0UserId);
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var listDetails = await response.Content.ReadFromJsonAsync<ListDetailsDto>();
+        listDetails.Should().NotBeNull();
+        listDetails!.Items.Select(i => i.Name).Should().Equal("Milk", "Bread");
+        listDetails.Items.Should().OnlyContain(i => !i.IsCompleted);
+        listDetails.TotalAmount.Should().Be(7.75m);
     }
 
     // Verifies reading a missing list returns not found.
@@ -261,7 +293,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
             HttpMethod.Post,
             "/lists",
             auth0UserId,
-            new { Name = "Groceries" });
+            new { Name = "Groceries", UnitLabel = " NZD " });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -272,12 +304,15 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         var list = await response.Content.ReadFromJsonAsync<ListDto>();
         list.Should().NotBeNull();
         list.Name.Should().Be("Groceries");
+        list.UnitLabel.Should().Be("NZD");
         list.Items.Should().BeEmpty();
     }
 
-    // Verifies list creation rejects invalid names through DTO validation.
-    [Fact]
-    public async Task PostLists_WhenNameIsInvalid_ReturnsBadRequest()
+    // Verifies null and whitespace-only unit labels are normalised to null on creation.
+    [Theory]
+    [InlineData(null)]
+    [InlineData(" ")]
+    public async Task PostLists_WhenUnitLabelIsNullOrWhiteSpace_ReturnsNullUnitLabel(string? unitLabel)
     {
         // Arrange
         var auth0UserId = CreateAuth0UserId();
@@ -286,7 +321,33 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
             HttpMethod.Post,
             "/lists",
             auth0UserId,
-            new { Name = "" });
+            new { Name = "Groceries", UnitLabel = unitLabel });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var list = await response.Content.ReadFromJsonAsync<ListDto>();
+        list.Should().NotBeNull();
+        list.UnitLabel.Should().BeNull();
+    }
+
+    // Verifies list creation rejects invalid names through DTO validation.
+    [Theory]
+    [InlineData("")]
+    [InlineData(TooLongListName)]
+    public async Task PostLists_WhenNameIsInvalid_ReturnsBadRequest(string name)
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Post,
+            "/lists",
+            auth0UserId,
+            new { Name = name, UnitLabel = "items" });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -295,7 +356,27 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    // Verifies an owned list can be renamed when the client sends the current version.
+    // Verifies list creation rejects unit labels that are too long through DTO validation.
+    [Fact]
+    public async Task PostLists_WhenUnitLabelIsTooLong_ReturnsBadRequest()
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Post,
+            "/lists",
+            auth0UserId,
+            new { Name = "Groceries", UnitLabel = TooLongUnitLabel });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    // Verifies an owned list can be updated when the client sends the current version.
     [Fact]
     public async Task PatchList_WhenVersionIsCurrent_UpdatesList()
     {
@@ -307,7 +388,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
             HttpMethod.Patch,
             $"/lists/{list.Id}",
             auth0UserId,
-            new { Name = "Weekend Groceries", Version = list.Version });
+            new { Name = "Weekend Groceries", UnitLabel = "items", Version = list.Version });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -318,6 +399,34 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         var updatedList = await response.Content.ReadFromJsonAsync<ListDto>();
         updatedList.Should().NotBeNull();
         updatedList.Name.Should().Be("Weekend Groceries");
+        updatedList.UnitLabel.Should().Be("items");
+    }
+
+    // Verifies null and whitespace-only unit labels clear an existing unit label.
+    [Theory]
+    [InlineData(null)]
+    [InlineData(" ")]
+    public async Task PatchList_WhenUnitLabelIsNullOrWhiteSpace_ClearsUnitLabel(string? unitLabel)
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, currentUser, "Groceries", "NZD");
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Patch,
+            $"/lists/{list.Id}",
+            auth0UserId,
+            new { Name = "Weekend Groceries", UnitLabel = unitLabel, Version = list.Version });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var updatedList = await response.Content.ReadFromJsonAsync<ListDto>();
+        updatedList.Should().NotBeNull();
+        updatedList.UnitLabel.Should().BeNull();
     }
 
     // Verifies list updates reject stale optimistic concurrency versions.
@@ -332,7 +441,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
             HttpMethod.Patch,
             $"/lists/{list.Id}",
             auth0UserId,
-            new { Name = "Weekend Groceries", Version = 0u });
+            new { Name = "Weekend Groceries", UnitLabel = "items", Version = 0u });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -367,8 +476,10 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
     }
 
     // Verifies list updates reject invalid names through DTO validation.
-    [Fact]
-    public async Task PatchList_WhenNameIsInvalid_ReturnsBadRequest()
+    [Theory]
+    [InlineData("")]
+    [InlineData(TooLongListName)]
+    public async Task PatchList_WhenNameIsInvalid_ReturnsBadRequest(string name)
     {
         // Arrange
         var auth0UserId = CreateAuth0UserId();
@@ -378,7 +489,28 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
             HttpMethod.Patch,
             $"/lists/{list.Id}",
             auth0UserId,
-            new { Name = "", Version = list.Version });
+            new { Name = name, UnitLabel = "items", Version = list.Version });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    // Verifies list updates reject unit labels that are too long through DTO validation.
+    [Fact]
+    public async Task PatchList_WhenUnitLabelIsTooLong_ReturnsBadRequest()
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, currentUser, "Groceries");
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Patch,
+            $"/lists/{list.Id}",
+            auth0UserId,
+            new { Name = "Weekend Groceries", UnitLabel = TooLongUnitLabel, Version = list.Version });
 
         // Act
         using var response = await client.SendAsync(request);

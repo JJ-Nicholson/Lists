@@ -35,31 +35,25 @@ public static class ListsEndpoints
             return Results.Ok(ToListsPageDto(result));
         });
 
-        // GET /lists/{listId} (Details of a specific list, with paged items returned from a search)
+        // GET /lists/{listId} (Details of a specific list, with items returned from a search)
         listsGroup.MapGet("/{listId}", async (
             int listId,
             string? search,
             string? status,
             string? sortBy,
             string? sortDirection,
-            int? page,
-            int? pageSize,
             IListsService listsService,
             CancellationToken cancellationToken) =>
         {
-            var (pageValue, pageSizeValue) = GetPagination(page, pageSize);
-
-            var result = await listsService.GetListPageByIdAsync(
+            var result = await listsService.GetListDetailsByIdAsync(
                 listId,
                 search,
                 status,
                 sortBy,
                 sortDirection,
-                pageValue,
-                pageSizeValue,
                 cancellationToken);
 
-            return Results.Ok(ToListItemsPageDto(result));
+            return Results.Ok(ToListDetailsDto(result));
         }).WithName(GetListEndpointName);
 
         // POST /lists (Create a new list)
@@ -68,7 +62,10 @@ public static class ListsEndpoints
             IListsService listsService,
             CancellationToken cancellationToken) =>
         {
-            var newList = await listsService.CreateListEntityAsync(dto.Name, cancellationToken);
+            var newList = await listsService.CreateListEntityAsync(
+                dto.Name,
+                dto.UnitLabel,
+                cancellationToken);
 
             return Results.CreatedAtRoute(
                 GetListEndpointName,
@@ -83,10 +80,11 @@ public static class ListsEndpoints
             IListsService listsService,
             CancellationToken cancellationToken) =>
         {
-            var updatedList = await listsService.UpdateListEntityNameAsync(
+            var updatedList = await listsService.UpdateListEntityAsync(
                 listId,
                 dto.Version!.Value,
                 dto.Name,
+                dto.UnitLabel,
                 cancellationToken);
 
             return Results.Ok(ToListDto(updatedList));

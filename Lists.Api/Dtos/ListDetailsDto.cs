@@ -1,10 +1,10 @@
 namespace Lists.Api.Dtos;
 
-public record ListItemsPageDto(
+public record ListDetailsDto(
     int Id,
     string Name,
+    string? UnitLabel,
     uint Version,
     IReadOnlyList<ItemDto> Items,
-    PageDto ItemsPage,
-    decimal TotalPrice
+    decimal TotalAmount
 );

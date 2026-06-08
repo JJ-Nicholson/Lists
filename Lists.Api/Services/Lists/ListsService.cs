@@ -17,22 +17,24 @@ public interface IListsService
         int pageSizeValue,
         CancellationToken cancellationToken);
 
-    Task<ListDetailsPageProjection> GetListPageByIdAsync(
+    Task<ListDetailsProjection> GetListDetailsByIdAsync(
         int listId,
         string? search,
         string? status,
         string? sortBy,
         string? sortDirection,
-        int pageValue,
-        int pageSizeValue,
         CancellationToken cancellationToken);
 
-    Task<ListEntity> CreateListEntityAsync(string listName, CancellationToken cancellationToken);
+    Task<ListEntity> CreateListEntityAsync(
+        string listName,
+        string? unitLabel,
+        CancellationToken cancellationToken);
 
-    Task<ListEntity> UpdateListEntityNameAsync(
+    Task<ListEntity> UpdateListEntityAsync(
         int listId,
         uint version,
         string newName,
+        string? unitLabel,
         CancellationToken cancellationToken);
 
     Task DeleteListEntityAsync(int listId, uint version, CancellationToken cancellationToken);
@@ -43,6 +45,15 @@ public class ListsService(
     IUsersService userService
 ) : IListsService
 {
+    private static string? NormaliseUnitLabel(string? unitLabel)
+    {
+        var trimmedUnitLabel = unitLabel?.Trim();
+
+        return string.IsNullOrEmpty(trimmedUnitLabel)
+            ? null
+            : trimmedUnitLabel;
+    }
+
     public async Task<ListSummariesPageProjection> GetListSummariesPageAsync(
         string? search,
         string? sortDirection,
@@ -75,14 +86,12 @@ public class ListsService(
             cancellationToken);
     }
 
-    public async Task<ListDetailsPageProjection> GetListPageByIdAsync(
+    public async Task<ListDetailsProjection> GetListDetailsByIdAsync(
         int listId,
         string? search,
         string? status,
         string? sortBy,
         string? sortDirection,
-        int pageValue,
-        int pageSizeValue,
         CancellationToken cancellationToken)
     {
         var currentUser = await userService.GetCurrentUserEntityAsync(cancellationToken);
@@ -101,7 +110,7 @@ public class ListsService(
             throw new BadRequestException("Invalid item status.");
         }
 
-        if (sortValue is not null and not "" and not "name" and not "price" and not "status")
+        if (sortValue is not null and not "" and not "name" and not "amount" and not "status")
         {
             throw new BadRequestException("Invalid item sort.");
         }
@@ -121,14 +130,12 @@ public class ListsService(
             throw new NotFoundException("List not found.");
         }
 
-        var result = await unitOfWork.Lists.GetListPageByIdAsync(
+        var result = await unitOfWork.Lists.GetListDetailsByIdAsync(
             listId,
             search,
             statusValue,
             sortValue,
             directionValue == "desc",
-            pageValue,
-            pageSizeValue,
             cancellationToken);
 
         if (result is null)
@@ -139,7 +146,10 @@ public class ListsService(
         return result;
     }
 
-    public async Task<ListEntity> CreateListEntityAsync(string listName, CancellationToken cancellationToken)
+    public async Task<ListEntity> CreateListEntityAsync(
+        string listName,
+        string? unitLabel,
+        CancellationToken cancellationToken)
     {
         var currentUser = await userService.GetCurrentUserEntityAsync(cancellationToken);
 
@@ -151,6 +161,7 @@ public class ListsService(
         var list = new ListEntity
         {
             Name = listName.Trim(),
+            UnitLabel = NormaliseUnitLabel(unitLabel),
             AccessEntries =
             [
                 new ListAccessEntryEntity
@@ -168,10 +179,11 @@ public class ListsService(
         return list;
     }
 
-    public async Task<ListEntity> UpdateListEntityNameAsync(
+    public async Task<ListEntity> UpdateListEntityAsync(
         int listId,
         uint version,
         string newName,
+        string? unitLabel,
         CancellationToken cancellationToken)
     {
         var currentUser = await userService.GetCurrentUserEntityAsync(cancellationToken);
@@ -199,6 +211,7 @@ public class ListsService(
         }
 
         list.Name = newName.Trim();
+        list.UnitLabel = NormaliseUnitLabel(unitLabel);
 
         try
         {

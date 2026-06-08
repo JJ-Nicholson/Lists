@@ -244,7 +244,7 @@ ol {
 a.highlight:link,
 a.highlight:visited,
 a.highlight:hover,
-a.highlight:active  {
+a.highlight:active {
     color: var(--tertiary-shade);
     font-weight: var(--font-weight-bold);
 }
@@ -262,9 +262,9 @@ a.highlight:active  {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: max(var(--button-min-height), 44px);
+    min-height: max(var(--button-min-height), 34px);
     /* Minimum vertical padding for possible wrapping text on mobiles. */
-    padding: max(var(--button-padding-block), 8px) var(--button-padding-inline);
+    padding: max(var(--button-padding-block), 6px) var(--button-padding-inline);
     border: var(--border-width) solid var(--secondary-base);
     border-radius: var(--radius-control);
     color: inherit;
@@ -663,8 +663,7 @@ a.highlight:active  {
     background-color: var(--primary-shade);
     background-image:
         linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-        radial-gradient(circle at 1px 1px, var(--paper-fleck) 1px, transparent 0);
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size:
         3.2rem 3.2rem,
         3.2rem 3.2rem,
@@ -898,7 +897,7 @@ a.highlight:active  {
     margin-top: 1rem;
 }
 
-.list-card__action--review-access + .list-card__action--edit:last-child {
+.list-card__action--review-access+.list-card__action--edit:last-child {
     grid-column: 1 / -1;
 }
 
@@ -927,7 +926,7 @@ a.highlight:active  {
     padding: 1.2rem;
     border-radius: var(--radius-card);
     background-color: var(--primary-base);
-    grid-template-areas: "check name price actions";
+    grid-template-areas: "check name amount actions";
     grid-template-columns:
         minmax(44px, 4.4rem) minmax(0, 1fr) minmax(10rem, 16rem) auto;
 }
@@ -959,13 +958,13 @@ a.highlight:active  {
     font-weight: var(--font-weight-bold);
 }
 
-.list-item-row__price {
-    grid-area: price;
+.list-item-row__amount {
+    grid-area: amount;
     justify-self: end;
 }
 
 .list-item-row--completed .list-item-row__name,
-.list-item-row--completed .list-item-row__price {
+.list-item-row--completed .list-item-row__amount {
     opacity: 0.7;
     text-decoration: line-through;
 }
@@ -977,8 +976,7 @@ a.highlight:active  {
     gap: 1rem;
 }
 
-/* ------ PRIVACY ------ */
-/* ------ NOT FOUND PAGE ------ */
+/* ------ DEFAULT CONTENT PAGES (PRIVACY, NOT FOUND, SETUP PROFILE) ------ */
 .content-page {
     display: flex;
     flex-direction: column;
@@ -998,6 +996,7 @@ a.highlight:active  {
     line-height: var(--line-height-tight);
 }
 
+/* ------ SETUP PROFILE ------ */
 .profile-setup {
     justify-content: center;
     min-height: calc(100svh - var(--nav-height) - var(--footer-height) - 12rem);
@@ -1122,12 +1121,12 @@ a.highlight:active  {
     .list-item-row {
         grid-template-areas:
             "check name"
-            "check price"
+            "check amount"
             "actions actions";
         grid-template-columns: minmax(44px, 4.4rem) minmax(0, 1fr);
     }
 
-    .list-item-row__price {
+    .list-item-row__amount {
         justify-self: start;
     }
 
@@ -1155,7 +1154,7 @@ a.highlight:active  {
 /* 600px / 16px = 37.5em */
 @media (max-width: 37.5em) {
     :root {
-        --footer-height: 20rem;
+        --footer-height: 14rem;
     }
 
     html {
@@ -1177,7 +1176,7 @@ a.highlight:active  {
     .site-footer {
         flex-direction: column;
         justify-content: center;
-        gap: 1.2rem;
+        gap: 1rem;
     }
 
     .site-footer__nav {

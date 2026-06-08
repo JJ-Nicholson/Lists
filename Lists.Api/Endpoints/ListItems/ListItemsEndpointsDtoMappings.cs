@@ -10,7 +10,7 @@ internal static class ListItemsEndpointsDtoMappings
         return new ItemDto(
             item.Id,
             item.Name,
-            item.Price,
+            item.Amount,
             item.IsCompleted,
             item.Version
         );

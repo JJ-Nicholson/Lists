@@ -3,7 +3,7 @@ namespace Lists.Api.Dtos;
 public record ItemDto(
     int Id,
     string Name,
-    decimal Price,
+    decimal Amount,
     bool IsCompleted,
     uint Version
 );

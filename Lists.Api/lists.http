@@ -1,7 +1,12 @@
 @baseUrl = http://localhost:5180
 @accessToken =
 
-### Get user
+### Health check
+GET {{baseUrl}}/health
+
+###
+
+### Get current user
 GET {{baseUrl}}/user
 Authorization: Bearer {{accessToken}}
 
@@ -13,7 +18,7 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "username": "1_"
+  "username": "user_1"
 }
 
 ###
@@ -42,23 +47,112 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "name": "Josh's list"
+  "name": "Josh's list",
+  "unitLabel": "NZD"
 }
 
 ###
 
-### Update a list name
+### Update a list
 PATCH {{baseUrl}}/lists/1
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
   "name": "A List with Items",
-  "version": 1235
+  "unitLabel": "items",
+  "version": 1
 }
 
 ###
 
 ### Delete a list
-DELETE {{baseUrl}}/lists/1?version=1236
+DELETE {{baseUrl}}/lists/1?version=1
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Create a list item
+POST {{baseUrl}}/lists/1/items
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Milk",
+  "amount": 4.50
+}
+
+###
+
+### Mark list items complete
+PATCH {{baseUrl}}/lists/1/items/mark-complete
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "version": 1
+    }
+  ]
+}
+
+###
+
+### Mark list items incomplete
+PATCH {{baseUrl}}/lists/1/items/mark-incomplete
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "version": 1
+    }
+  ]
+}
+
+###
+
+### Update a list item
+PATCH {{baseUrl}}/lists/1/items/1
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Oat milk",
+  "amount": 6.25,
+  "isCompleted": false,
+  "version": 1
+}
+
+###
+
+### Delete a list item
+DELETE {{baseUrl}}/lists/1/items/1?version=1
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Grant list access
+POST {{baseUrl}}/lists/1/access
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "username": "user_2"
+}
+
+###
+
+### Get list access
+GET {{baseUrl}}/lists/1/access
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Revoke list access
+DELETE {{baseUrl}}/lists/1/access/user_2
 Authorization: Bearer {{accessToken}}

@@ -40,3 +40,14 @@ export async function updateCurrentUser(
 
     return response.json();
 }
+
+export async function deleteCurrentUser(
+    accessToken?: string | null,
+): Promise<void> {
+    const response = await fetch(buildApiUrl("/user"), {
+        method: "DELETE",
+        headers: buildHeaders(accessToken),
+    });
+
+    await throwIfResponseNotOk(response, "Failed to delete user.");
+}

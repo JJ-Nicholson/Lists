@@ -4,7 +4,7 @@ public class ListItemEntity
 {
     public int Id { get; set; }
     public required string Name { get; set; }
-    public decimal Price { get; set; }
+    public decimal Amount { get; set; }
     public bool IsCompleted { get; set; }
     public uint Version { get; set; }
     public ListEntity List { get; set; } = null!;

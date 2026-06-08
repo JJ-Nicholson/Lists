@@ -21,7 +21,7 @@ public static class ListItemsEndpoints
             await listItemsService.CreateListItemEntityAsync(
                 listId,
                 dto.Name,
-                dto.Price,
+                dto.Amount,
                 cancellationToken);
 
             // The frontend refetches after creating an item, so no item representation is needed.
@@ -72,7 +72,7 @@ public static class ListItemsEndpoints
                 listId,
                 itemId,
                 dto.Name,
-                dto.Price,
+                dto.Amount,
                 dto.IsCompleted,
                 dto.Version!.Value,
                 cancellationToken);

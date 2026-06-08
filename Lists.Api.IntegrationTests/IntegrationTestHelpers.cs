@@ -50,7 +50,8 @@ public static class IntegrationTestHelpers
     public static async Task<ListEntity> SeedListAsync(
         ListsWebApplicationFactory factory,
         UserEntity owner,
-        string name)
+        string name,
+        string? unitLabel = null)
     {
         using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ListsContext>();
@@ -58,6 +59,7 @@ public static class IntegrationTestHelpers
         var list = new ListEntity
         {
             Name = name,
+            UnitLabel = unitLabel,
             AccessEntries =
             [
                 new ListAccessEntryEntity
@@ -101,7 +103,7 @@ public static class IntegrationTestHelpers
         ListsWebApplicationFactory factory,
         ListEntity list,
         string name,
-        decimal price,
+        decimal amount,
         bool isCompleted = false)
     {
         using var scope = factory.Services.CreateScope();
@@ -111,7 +113,7 @@ public static class IntegrationTestHelpers
         {
             ListId = list.Id,
             Name = name,
-            Price = price,
+            Amount = amount,
             IsCompleted = isCompleted
         };
 

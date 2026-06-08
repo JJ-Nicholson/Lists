@@ -13,7 +13,7 @@ public interface IListItemsService
     Task CreateListItemEntityAsync(
         int listId,
         string itemName,
-        decimal itemPrice,
+        decimal itemAmount,
         CancellationToken cancellationToken);
 
     Task<IReadOnlyList<ListItemEntity>> UpdateItemEntitiesCompletionAsync(
@@ -26,7 +26,7 @@ public interface IListItemsService
         int listId,
         int itemId,
         string name,
-        decimal price,
+        decimal amount,
         bool isCompleted,
         uint version,
         CancellationToken cancellationToken);
@@ -42,7 +42,7 @@ public class ListItemsService(
     public async Task CreateListItemEntityAsync(
         int listId,
         string itemName,
-        decimal itemPrice,
+        decimal itemAmount,
         CancellationToken cancellationToken)
     {
         var currentUser = await userService.GetCurrentUserEntityAsync(cancellationToken);
@@ -66,7 +66,7 @@ public class ListItemsService(
         {
             ListId = listId,
             Name = itemName.Trim(),
-            Price = itemPrice,
+            Amount = itemAmount,
             IsCompleted = false
         };
 
@@ -157,7 +157,7 @@ public class ListItemsService(
         int listId,
         int itemId,
         string name,
-        decimal price,
+        decimal amount,
         bool isCompleted,
         uint version,
         CancellationToken cancellationToken)
@@ -188,7 +188,7 @@ public class ListItemsService(
 
         unitOfWork.ListItems.SetListItemEntityOriginalVersion(item, version);
         item.Name = name.Trim();
-        item.Price = price;
+        item.Amount = amount;
         item.IsCompleted = isCompleted;
 
         try

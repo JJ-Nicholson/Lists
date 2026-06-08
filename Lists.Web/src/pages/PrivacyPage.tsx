@@ -13,8 +13,8 @@ export default function PrivacyPage() {
                 <h2>What We Store</h2>
                 <p>
                     Lists stores your username, an internal account identifier,
-                    list names, item names, item prices, item completion state,
-                    and list access roles. It also stores internal record
+                    list names, unit labels, item names, item amounts, item
+                    completion state, and list access roles. It also stores internal record
                     versions so the app can detect when a list or item has
                     changed before saving updates.
                 </p>
@@ -41,13 +41,14 @@ export default function PrivacyPage() {
                 <h2>Sharing Data</h2>
                 <p>
                     Lists is designed for sharing. When you create a list, you become the
-                    owner of that list. As an owner, you can rename the list, view, add,
-                    remove, and modify items in the list, as well as share access to the
+                    owner of that list. As an owner, you can rename the list, change its
+                    unit label, view, add, remove, and modify items, as well as share access to the
                     list with other users. When you share a list with another user, that user
-                    becomes an editor of the list. Editors can add, remove, and modify items
-                    in the list, but cannot rename the list or share access with other users.
-                    Users with access to a list can see the list name, items, prices,
-                    completion state, who else has access, and what role each user has.
+                    becomes an editor of the list. Editors can rename the list, change its
+                    unit label, and add, remove, and modify items, but cannot delete the list
+                    or share access with other users. Users with access to a list can see the
+                    list name, unit label, items, amounts, completion state, who else has
+                    access, and what role each user has.
                 </p>
             </section>
 

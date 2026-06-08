@@ -10,7 +10,7 @@ internal static class ListsEndpointsDtoMappings
     {
         return new ListsPageDto(
             page.Lists.Select(ToListSummaryDto).ToList(),
-            ToPageDto(page.Page)
+            ToListsPageInfoDto(page.Page)
         );
     }
 
@@ -19,6 +19,7 @@ internal static class ListsEndpointsDtoMappings
         return new ListSummaryDto(
             summary.Id,
             summary.Name,
+            summary.UnitLabel,
             summary.Version,
             summary.ItemCount,
             summary.CompletedItemCount,
@@ -32,15 +33,15 @@ internal static class ListsEndpointsDtoMappings
         return role.ToString().ToLowerInvariant();
     }
 
-    internal static ListItemsPageDto ToListItemsPageDto(ListDetailsPageProjection list)
+    internal static ListDetailsDto ToListDetailsDto(ListDetailsProjection list)
     {
-        return new ListItemsPageDto(
+        return new ListDetailsDto(
             list.Id,
             list.Name,
+            list.UnitLabel,
             list.Version,
             list.Items.Select(ToItemDto).ToList(),
-            ToPageDto(list.Page),
-            list.TotalPrice
+            list.TotalAmount
         );
     }
 
@@ -49,7 +50,7 @@ internal static class ListsEndpointsDtoMappings
         return new ItemDto(
             item.Id,
             item.Name,
-            item.Price,
+            item.Amount,
             item.IsCompleted,
             item.Version
         );
@@ -60,6 +61,7 @@ internal static class ListsEndpointsDtoMappings
         return new ListDto(
             list.Id,
             list.Name,
+            list.UnitLabel,
             list.Version,
             list.Items.Select(ToItemDto).ToList()
         );
@@ -70,15 +72,15 @@ internal static class ListsEndpointsDtoMappings
         return new ItemDto(
             item.Id,
             item.Name,
-            item.Price,
+            item.Amount,
             item.IsCompleted,
             item.Version
         );
     }
 
-    private static PageDto ToPageDto(PageInfo page)
+    private static ListsPageInfoDto ToListsPageInfoDto(ListSummariesPageInfoProjection page)
     {
-        return new PageDto(
+        return new ListsPageInfoDto(
             page.Page,
             page.PageSize,
             page.TotalCount,

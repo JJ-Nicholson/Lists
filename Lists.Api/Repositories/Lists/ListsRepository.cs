@@ -16,14 +16,12 @@ public interface IListsRepository
         int pageSizeValue,
         CancellationToken cancellationToken);
 
-    Task<ListDetailsPageProjection?> GetListPageByIdAsync(
+    Task<ListDetailsProjection?> GetListDetailsByIdAsync(
         int listId,
         string? search,
         string? status,
         string? sortBy,
         bool descending,
-        int pageValue,
-        int pageSizeValue,
         CancellationToken cancellationToken);
 
     ListEntity CreateListEntity(ListEntity list);
@@ -90,7 +88,7 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
             : listsQuery.OrderBy(l => l.List.Name).ThenBy(l => l.List.Id);
 
         var totalCount = await listsQuery.CountAsync(cancellationToken);
-        var pageInfo = GetPageInfo(pageValue, pageSizeValue, totalCount);
+        var pageInfo = GetListSummariesPageInfo(pageValue, pageSizeValue, totalCount);
 
         var summaries = await listsQuery
             .AsNoTracking()
@@ -99,6 +97,7 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
             .Select(l => new ListSummaryProjection(
                 l.List.Id,
                 l.List.Name,
+                l.List.UnitLabel,
                 l.List.Version,
                 l.List.Items.Count,
                 l.List.Items.Count(i => i.IsCompleted),
@@ -113,14 +112,12 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
         );
     }
 
-    public async Task<ListDetailsPageProjection?> GetListPageByIdAsync(
+    public async Task<ListDetailsProjection?> GetListDetailsByIdAsync(
         int listId,
         string? search,
         string? status,
         string? sortBy,
         bool descending,
-        int pageValue,
-        int pageSizeValue,
         CancellationToken cancellationToken)
     {
         var list = await dbContext.Lists
@@ -130,6 +127,7 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
             {
                 l.Id,
                 l.Name,
+                l.UnitLabel,
                 l.Version
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -165,9 +163,9 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
                 ? itemsQuery.OrderByDescending(i => i.Name).ThenBy(i => i.Id)
                 : itemsQuery.OrderBy(i => i.Name).ThenBy(i => i.Id),
 
-            "price" => descending
-                ? itemsQuery.OrderByDescending(i => i.Price).ThenBy(i => i.Id)
-                : itemsQuery.OrderBy(i => i.Price).ThenBy(i => i.Id),
+            "amount" => descending
+                ? itemsQuery.OrderByDescending(i => i.Amount).ThenBy(i => i.Id)
+                : itemsQuery.OrderBy(i => i.Amount).ThenBy(i => i.Id),
 
             "status" => descending
                 ? itemsQuery.OrderByDescending(i => i.IsCompleted).ThenBy(i => i.Id)
@@ -176,29 +174,25 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
             _ => throw new ArgumentException("Invalid item sort.", nameof(sortBy))
         };
 
-        var totalCount = await itemsQuery.CountAsync(cancellationToken);
-        var pageInfo = GetPageInfo(pageValue, pageSizeValue, totalCount);
-        var totalPrice = await itemsQuery.SumAsync(i => (decimal?)i.Price, cancellationToken) ?? 0;
+        var totalAmount = await itemsQuery.SumAsync(i => (decimal?)i.Amount, cancellationToken) ?? 0;
 
         var items = await itemsQuery
-            .Skip((pageInfo.Page - 1) * pageInfo.PageSize)
-            .Take(pageInfo.PageSize)
             .Select(i => new ListItemProjection(
                 i.Id,
                 i.Name,
-                i.Price,
+                i.Amount,
                 i.IsCompleted,
                 i.Version
             ))
             .ToListAsync(cancellationToken);
 
-        return new ListDetailsPageProjection(
+        return new ListDetailsProjection(
             list.Id,
             list.Name,
+            list.UnitLabel,
             list.Version,
             items,
-            pageInfo,
-            totalPrice
+            totalAmount
         );
     }
 
@@ -267,13 +261,16 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
         return lists.Count;
     }
 
-    private static PageInfo GetPageInfo(int requestedPage, int pageSize, int totalCount)
+    private static ListSummariesPageInfoProjection GetListSummariesPageInfo(
+        int requestedPage,
+        int pageSize,
+        int totalCount)
     {
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         var effectivePage = totalPages == 0
             ? 1
             : Math.Min(requestedPage, totalPages);
 
-        return new PageInfo(effectivePage, pageSize, totalCount, totalPages);
+        return new ListSummariesPageInfoProjection(effectivePage, pageSize, totalCount, totalPages);
     }
 }

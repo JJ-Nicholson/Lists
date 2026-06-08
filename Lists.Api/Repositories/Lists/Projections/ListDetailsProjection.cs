@@ -1,18 +1,18 @@
 namespace Lists.Api.Repositories.Lists.Projections;
 
-public record ListDetailsPageProjection(
+public record ListDetailsProjection(
     int Id,
     string Name,
+    string? UnitLabel,
     uint Version,
     IReadOnlyList<ListItemProjection> Items,
-    PageInfo Page,
-    decimal TotalPrice
+    decimal TotalAmount
 );
 
 public record ListItemProjection(
     int Id,
     string Name,
-    decimal Price,
+    decimal Amount,
     bool IsCompleted,
     uint Version
 );

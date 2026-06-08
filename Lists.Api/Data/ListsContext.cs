@@ -38,6 +38,10 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
             .HasMaxLength(100);
 
         modelBuilder.Entity<ListEntity>()
+            .Property(l => l.UnitLabel)
+            .HasMaxLength(30);
+
+        modelBuilder.Entity<ListEntity>()
             .HasMany(l => l.Items)
             .WithOne(i => i.List)
             .HasForeignKey(i => i.ListId)
@@ -73,7 +77,7 @@ public class ListsContext(DbContextOptions<ListsContext> options) : DbContext(op
             .HasMaxLength(100);
 
         modelBuilder.Entity<ListItemEntity>()
-            .Property(i => i.Price)
+            .Property(i => i.Amount)
             .HasPrecision(10, 2);
 
         modelBuilder.Entity<UserEntity>()

@@ -44,7 +44,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Post,
             $"/lists/{list.Id}/items",
             auth0UserId,
-            new { Name = "Milk", Price = 4.50m });
+            new { Name = "Milk", Amount = 4.50m });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -61,11 +61,11 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
         using var getResponse = await client.SendAsync(getRequest);
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var listPage = await getResponse.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
         var createdItem = listPage!.Items.Should().ContainSingle().Which;
         createdItem.Name.Should().Be("Milk");
-        createdItem.Price.Should().Be(4.50m);
+        createdItem.Amount.Should().Be(4.50m);
         createdItem.IsCompleted.Should().BeFalse();
         createdItem.Version.Should().BeGreaterThan(0u);
     }
@@ -85,7 +85,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Post,
             $"/lists/{list.Id}/items",
             auth0UserId,
-            new { Name = "Milk", Price = 4.50m });
+            new { Name = "Milk", Amount = 4.50m });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -97,16 +97,16 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
         using var getResponse = await client.SendAsync(getRequest);
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var listPage = await getResponse.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
-        listPage!.Items.Should().ContainSingle(i => i.Name == "Milk" && i.Price == 4.50m);
+        listPage!.Items.Should().ContainSingle(i => i.Name == "Milk" && i.Amount == 4.50m);
     }
 
     // Verifies item creation rejects invalid item payloads through DTO validation.
     [Theory]
     [InlineData("", 1)]
     [InlineData("Milk", -100000000)]
-    public async Task PostItem_WhenPayloadIsInvalid_ReturnsBadRequest(string name, decimal price)
+    public async Task PostItem_WhenPayloadIsInvalid_ReturnsBadRequest(string name, decimal amount)
     {
         // Arrange
         var auth0UserId = CreateAuth0UserId();
@@ -117,7 +117,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Post,
             $"/lists/{list.Id}/items",
             auth0UserId,
-            new { Name = name, Price = price });
+            new { Name = name, Amount = amount });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -140,7 +140,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Post,
             $"/lists/{list.Id}/items",
             auth0UserId,
-            new { Name = "Milk", Price = 4.50m });
+            new { Name = "Milk", Amount = 4.50m });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -163,7 +163,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Patch,
             $"/lists/{list.Id}/items/{item.Id}",
             auth0UserId,
-            new { Name = "Oat Milk", Price = 6.25m, IsCompleted = true, Version = item.Version });
+            new { Name = "Oat Milk", Amount = 6.25m, IsCompleted = true, Version = item.Version });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -175,7 +175,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
         updatedItem.Should().NotBeNull();
         updatedItem!.Id.Should().Be(item.Id);
         updatedItem.Name.Should().Be("Oat Milk");
-        updatedItem.Price.Should().Be(6.25m);
+        updatedItem.Amount.Should().Be(6.25m);
         updatedItem.IsCompleted.Should().BeTrue();
     }
 
@@ -193,7 +193,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Patch,
             $"/lists/{list.Id}/items/{item.Id}",
             auth0UserId,
-            new { Name = "Oat Milk", Price = 6.25m, IsCompleted = true, Version = 0u });
+            new { Name = "Oat Milk", Amount = 6.25m, IsCompleted = true, Version = 0u });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -220,7 +220,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
             HttpMethod.Patch,
             $"/lists/{list.Id}/items/{item.Id}",
             auth0UserId,
-            new { Name = "Oat Milk", Price = 6.25m, IsCompleted = true, Version = item.Version });
+            new { Name = "Oat Milk", Amount = 6.25m, IsCompleted = true, Version = item.Version });
 
         // Act
         using var response = await client.SendAsync(request);
@@ -254,7 +254,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
         using var getResponse = await client.SendAsync(getRequest);
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var listPage = await getResponse.Content.ReadFromJsonAsync<ListItemsPageDto>();
+        var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
         listPage!.Items.Should().BeEmpty();
     }
@@ -538,11 +538,11 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
     public static TheoryData<HttpMethod, string, object?> ListItemRequestsRequiringUsername() => new()
     {
-        { HttpMethod.Post, "/lists/1/items", new { Name = "Milk", Price = 4.50m } },
+        { HttpMethod.Post, "/lists/1/items", new { Name = "Milk", Amount = 4.50m } },
         {
             HttpMethod.Patch,
             "/lists/1/items/1",
-            new { Name = "Milk", Price = 4.50m, IsCompleted = true, Version = 1u }
+            new { Name = "Milk", Amount = 4.50m, IsCompleted = true, Version = 1u }
         },
         { HttpMethod.Delete, "/lists/1/items/1?version=1", null },
         { HttpMethod.Patch, "/lists/1/items/mark-complete", new { Items = new[] { new { Id = 1, Version = 1u } } } },
