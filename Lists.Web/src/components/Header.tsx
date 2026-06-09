@@ -2,7 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import type { ReactElement } from "react";
 import { useLocation } from "react-router";
 
-import { Button } from "./Button";
+import { Button, ButtonLink } from "./Button";
 
 type ReturnToLocation = {
     pathname?: unknown;
@@ -45,6 +45,7 @@ export default function Header(): ReactElement {
         logout: auth0Logout,
     } = useAuth0();
     const location = useLocation();
+    const brandTo = isAuthenticated ? "/lists" : "/";
 
     function login(): void {
         loginWithRedirect({
@@ -67,6 +68,66 @@ export default function Header(): ReactElement {
 
     return (
         <header className="site-header">
+            <ButtonLink
+                aria-label="Lists home"
+                className="site-header__brand"
+                size="large"
+                to={brandTo}
+                variant="header"
+            >
+                <svg
+                    aria-hidden="true"
+                    className="site-header__brand-mark"
+                    focusable="false"
+                    viewBox="0 0 52 52"
+                >
+                    <path
+                        d="M13 8h25a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4Z"
+                        fill="var(--primary-shade)"
+                        stroke="currentColor"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                    />
+                    <path
+                        d="M17 5v8M25 5v8M33 5v8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                    />
+                    <path
+                        d="M16 20h17M16 27h14M16 34h10"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeWidth="3"
+                    />
+                    <path
+                        d="M30 38.5 41 27.5l5.5 5.5-11 11H30v-5.5Z"
+                        fill="var(--secondary-tint)"
+                        stroke="currentColor"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                    />
+                    <path
+                        d="m41 27.5 2.5-2.5a2.5 2.5 0 0 1 3.5 0l2 2a2.5 2.5 0 0 1 0 3.5L46.5 33"
+                        fill="var(--pencil-rubber-pink)"
+                        stroke="currentColor"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                    />
+                    <path
+                        d="M30 38.5V44h5.5"
+                        fill="var(--primary-shade)"
+                        stroke="currentColor"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                    />
+                </svg>
+                <span className="site-header__brand-text">Lists</span>
+            </ButtonLink>
+
             <nav className="site-header__nav" aria-label="Primary">
                 {isLoading ? (
                     <Button disabled variant="header">
@@ -74,9 +135,9 @@ export default function Header(): ReactElement {
                     </Button>
                 ) : isAuthenticated ? (
                     <>
-                        <Button disabled variant="header">
-                            Signed in
-                        </Button>
+                        <ButtonLink to="/lists" variant="header">
+                            Your Lists
+                        </ButtonLink>
                         <Button onClick={logout} variant="header">
                             Logout
                         </Button>

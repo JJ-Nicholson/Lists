@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap");
 
-/* 
+/*
 
 ---------- TYPOGRAPHY ----------
 
@@ -698,7 +698,7 @@ a.highlight:active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* Creates some separation between the 
+    /* Creates some separation between the
        heading and button on smaller screens. */
     gap: 2rem;
 }
@@ -761,8 +761,8 @@ a.highlight:active {
 
 .home__previews {
     position: relative;
-    /* creates a new stacking context for the background 
-       overlay (see CSS below), so it stays in front of the 
+    /* creates a new stacking context for the background
+       overlay (see CSS below), so it stays in front of the
        page's background but behind the grid. */
     isolation: isolate;
     display: flex;
@@ -816,6 +816,10 @@ a.highlight:active {
     user-select: none;
 }
 
+.home__previews-container select:disabled {
+    opacity: 1;
+    -webkit-text-fill-color: var(--secondary-base);
+}
 
 /* ------ LISTS ------ */
 
@@ -869,7 +873,7 @@ a.highlight:active {
     border-radius: inherit;
 }
 
-/* All direct children of the card except for the link are above the link 
+/* All direct children of the card except for the link are above the link
    in z-index, so they remain interactive and visible. */
 .list-card--link> :not(.list-card__link) {
     position: relative;
