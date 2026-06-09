@@ -31,7 +31,7 @@ public class HealthEndpointsTests : IClassFixture<ListsWebApplicationFactory>, I
 
         var health = await response.Content.ReadFromJsonAsync<HealthResponse>();
         health.Should().NotBeNull();
-        health!.Status.Should().Be("Healthy");
+        health.Status.Should().Be("Healthy");
         health.CheckedAt.Should().NotBe(default);
     }
 

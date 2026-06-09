@@ -5,7 +5,7 @@ const githubUrl = "https://github.com/JJ-Nicholson/Lists";
 export default function Footer() {
     return (
         <footer className="site-footer">
-            <p>Plan Together</p>
+            <p>Plan Together!</p>
 
             <nav className="site-footer__nav" aria-label="Footer">
                 <Link to="/privacy">Privacy</Link>

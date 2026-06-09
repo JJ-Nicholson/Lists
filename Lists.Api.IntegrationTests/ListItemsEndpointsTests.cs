@@ -63,7 +63,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
         var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
-        var createdItem = listPage!.Items.Should().ContainSingle().Which;
+        var createdItem = listPage.Items.Should().ContainSingle().Which;
         createdItem.Name.Should().Be("Milk");
         createdItem.Amount.Should().Be(4.50m);
         createdItem.IsCompleted.Should().BeFalse();
@@ -99,7 +99,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
         var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
-        listPage!.Items.Should().ContainSingle(i => i.Name == "Milk" && i.Amount == 4.50m);
+        listPage.Items.Should().ContainSingle(i => i.Name == "Milk" && i.Amount == 4.50m);
     }
 
     // Verifies item creation rejects invalid item payloads through DTO validation.
@@ -173,7 +173,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
         var updatedItem = await response.Content.ReadFromJsonAsync<ItemDto>();
         updatedItem.Should().NotBeNull();
-        updatedItem!.Id.Should().Be(item.Id);
+        updatedItem.Id.Should().Be(item.Id);
         updatedItem.Name.Should().Be("Oat Milk");
         updatedItem.Amount.Should().Be(6.25m);
         updatedItem.IsCompleted.Should().BeTrue();
@@ -256,7 +256,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
         var listPage = await getResponse.Content.ReadFromJsonAsync<ListDetailsDto>();
         listPage.Should().NotBeNull();
-        listPage!.Items.Should().BeEmpty();
+        listPage.Items.Should().BeEmpty();
     }
 
     // Verifies item deletion is idempotent for missing items.
@@ -337,7 +337,7 @@ public class ListItemsEndpointsTests : IClassFixture<ListsWebApplicationFactory>
 
         var items = await response.Content.ReadFromJsonAsync<IReadOnlyList<ItemDto>>();
         items.Should().NotBeNull();
-        items!.Select(i => i.Id).Should().Equal(bread.Id, milk.Id);
+        items.Select(i => i.Id).Should().Equal(bread.Id, milk.Id);
         items.Should().OnlyContain(i => i.IsCompleted);
     }
 

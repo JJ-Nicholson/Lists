@@ -136,7 +136,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var page = await response.Content.ReadFromJsonAsync<ListsPageDto>();
         page.Should().NotBeNull();
-        var sharedList = page!.Lists.Should().ContainSingle().Which;
+        var sharedList = page.Lists.Should().ContainSingle().Which;
         sharedList.Id.Should().Be(list.Id);
         sharedList.Name.Should().Be("Shared Groceries");
         sharedList.UnitLabel.Should().Be("NZD");
@@ -217,7 +217,7 @@ public class ListsEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var listDetails = await response.Content.ReadFromJsonAsync<ListDetailsDto>();
         listDetails.Should().NotBeNull();
-        listDetails!.Items.Select(i => i.Name).Should().Equal("Milk", "Bread");
+        listDetails.Items.Select(i => i.Name).Should().Equal("Milk", "Bread");
         listDetails.Items.Should().OnlyContain(i => !i.IsCompleted);
         listDetails.TotalAmount.Should().Be(7.75m);
     }

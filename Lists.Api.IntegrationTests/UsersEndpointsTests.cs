@@ -58,7 +58,7 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var user = await response.Content.ReadFromJsonAsync<UserDto>();
         user.Should().NotBeNull();
-        user!.Username.Should().BeNull();
+        user.Username.Should().BeNull();
         user.NeedsUsername.Should().BeTrue();
     }
 
@@ -84,7 +84,7 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var user = await response.Content.ReadFromJsonAsync<UserDto>();
         user.Should().NotBeNull();
-        user!.Username.Should().Be("josh_user");
+        user.Username.Should().Be("josh_user");
         user.NeedsUsername.Should().BeFalse();
     }
 
@@ -110,7 +110,7 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var user = await response.Content.ReadFromJsonAsync<UserDto>();
         user.Should().NotBeNull();
-        user!.Username.Should().Be("josh_user");
+        user.Username.Should().Be("josh_user");
         user.NeedsUsername.Should().BeFalse();
     }
 
@@ -192,7 +192,7 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var user = await getResponse.Content.ReadFromJsonAsync<UserDto>();
         user.Should().NotBeNull();
-        user!.Username.Should().BeNull();
+        user.Username.Should().BeNull();
         user.NeedsUsername.Should().BeTrue();
     }
 
@@ -210,6 +210,6 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
         var user = await response.Content.ReadFromJsonAsync<UserDto>();
         user.Should().NotBeNull();
 
-        return user!;
+        return user;
     }
 }

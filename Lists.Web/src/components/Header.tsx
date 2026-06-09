@@ -54,7 +54,7 @@ export default function Header(): ReactElement {
 
     function signup(): void {
         loginWithRedirect({
-            appState: { returnTo: getReturnTo(location.state) },
+            appState: { returnTo: "/lists" },
             authorizationParams: { screen_hint: "signup" },
         });
     }

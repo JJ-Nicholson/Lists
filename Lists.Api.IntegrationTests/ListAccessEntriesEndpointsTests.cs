@@ -11,6 +11,9 @@ namespace Lists.Api.IntegrationTests;
 
 public class ListAccessEntriesEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IAsyncLifetime
 {
+    private const string TooLongUsername =
+        "this-is-a-very-long-username-that-exceeds-the-maximum-length";
+
     private readonly ListsWebApplicationFactory factory;
     private readonly HttpClient client;
 
@@ -211,6 +214,33 @@ public class ListAccessEntriesEndpointsTests : IClassFixture<ListsWebApplication
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    // Verifies grant access rejects malformed target usernames before lookup.
+    [Theory]
+    [InlineData("")]
+    [InlineData("a")]
+    [InlineData("_missing_user")]
+    [InlineData("missing user")]
+    [InlineData(TooLongUsername)]
+    public async Task PostListAccess_WhenTargetUsernameIsInvalid_ReturnsBadRequest(string username)
+    {
+        // Arrange
+        var ownerAuth0UserId = CreateAuth0UserId();
+        var owner = await SeedUserAsync(factory, ownerAuth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, owner, "Groceries");
+
+        using var request = CreateAuthenticatedJsonRequest(
+            HttpMethod.Post,
+            $"/lists/{list.Id}/access",
+            ownerAuth0UserId,
+            new { Username = username });
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     // Verifies a list owner can revoke another user's access.
