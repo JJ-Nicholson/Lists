@@ -5,7 +5,7 @@ namespace Lists.Api.Endpoints.Lists;
 internal static class ListsEndpointsPagination
 {
     private const int DefaultPage = 1;
-    private const int DefaultPageSize = 96;
+    private const int DefaultPageSize = 12;
     private const int MaxPageSize = 1000;
 
     internal static (int Page, int PageSize) GetPagination(int? page, int? pageSize)

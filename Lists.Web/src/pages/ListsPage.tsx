@@ -75,14 +75,6 @@ export default function ListsPage() {
         setActiveListDialog(null);
     }
 
-    if (isLoading && !hasLoadedLists) {
-        return <p>Loading...</p>;
-    }
-
-    if (error && !hasLoadedLists) {
-        return <p>{error}</p>;
-    }
-
     return (
         <>
             <ListsHeader onCreateList={openCreateModal} />
@@ -97,6 +89,8 @@ export default function ListsPage() {
             {error && <p role="alert">{error}</p>}
 
             <ListsGrid
+                hasLoadedLists={hasLoadedLists}
+                isLoading={isLoading && !hasLoadedLists}
                 lists={lists}
                 onDeleteList={openDeleteModal}
                 onEditList={openEditModal}

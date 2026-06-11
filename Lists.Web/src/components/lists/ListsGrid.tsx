@@ -3,6 +3,8 @@ import ListCard from "./ListCard";
 
 type ListsGridProps = {
     disabled?: boolean;
+    hasLoadedLists?: boolean;
+    isLoading?: boolean;
     lists: ListSummary[];
     onEditList: (list: ListSummary) => void;
     onReviewAccess: (list: ListSummary) => void;
@@ -11,12 +13,22 @@ type ListsGridProps = {
 
 export default function ListsGrid({
     disabled = false,
+    hasLoadedLists = true,
+    isLoading = false,
     lists,
     onEditList,
     onReviewAccess,
     onDeleteList,
 }: ListsGridProps) {
     const hasLists = lists.length > 0;
+
+    if (isLoading) {
+        return <p>Loading lists...</p>;
+    }
+
+    if (!hasLoadedLists) {
+        return null;
+    }
 
     return (
         <div>

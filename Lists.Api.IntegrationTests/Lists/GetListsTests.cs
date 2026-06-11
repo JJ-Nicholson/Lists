@@ -35,7 +35,7 @@ public class GetListsTests : EndpointTestBase
         page.Should().NotBeNull();
         page.Lists.Should().BeEmpty();
         page.Page.Page.Should().Be(1);
-        page.Page.PageSize.Should().Be(96);
+        page.Page.PageSize.Should().Be(12);
         page.Page.TotalCount.Should().Be(0);
         page.Page.TotalPages.Should().Be(0);
     }
