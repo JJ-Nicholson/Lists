@@ -5,11 +5,11 @@ using FluentAssertions;
 
 namespace Lists.Api.IntegrationTests;
 
-public class HealthEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IDisposable
+public class GetHealthTests : IClassFixture<ListsWebApplicationFactory>, IDisposable
 {
     private readonly HttpClient client;
 
-    public HealthEndpointsTests(ListsWebApplicationFactory factory)
+    public GetHealthTests(ListsWebApplicationFactory factory)
     {
         client = factory.CreateClient();
     }

@@ -9,57 +9,11 @@ using static Lists.Api.IntegrationTests.IntegrationTestHelpers;
 
 namespace Lists.Api.IntegrationTests;
 
-public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IAsyncLifetime
+public class PatchUserTests : EndpointTestBase
 {
-    private readonly ListsWebApplicationFactory factory;
-    private readonly HttpClient client;
-
-    public UsersEndpointsTests(ListsWebApplicationFactory factory)
+    public PatchUserTests(ListsWebApplicationFactory factory)
+        : base(factory)
     {
-        this.factory = factory;
-        client = factory.CreateClient();
-    }
-
-    public Task InitializeAsync()
-    {
-        return factory.ResetDatabaseAsync();
-    }
-
-    public Task DisposeAsync()
-    {
-        client.Dispose();
-        return Task.CompletedTask;
-    }
-
-    // Verifies user endpoints require an authenticated user.
-    [Fact]
-    public async Task GetUser_WhenUnauthenticated_ReturnsUnauthorized()
-    {
-        // Act
-        using var response = await client.GetAsync("/user");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
-
-    // Verifies the first authenticated user lookup creates a user that still needs a username.
-    [Fact]
-    public async Task GetUser_WhenAuthenticated_CreatesUserThatNeedsUsername()
-    {
-        // Arrange
-        var auth0UserId = CreateAuth0UserId();
-        using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/user", auth0UserId);
-
-        // Act
-        using var response = await client.SendAsync(request);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var user = await response.Content.ReadFromJsonAsync<UserDto>();
-        user.Should().NotBeNull();
-        user.Username.Should().BeNull();
-        user.NeedsUsername.Should().BeTrue();
     }
 
     // Verifies username updates are accepted and stored in normalised lowercase form.
@@ -165,35 +119,6 @@ public class UsersEndpointsTests : IClassFixture<ListsWebApplicationFactory>, IA
 
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Contain("Username is already taken.");
-    }
-
-    // Verifies deleting a user removes the current user record and a later lookup creates a fresh user.
-    [Fact]
-    public async Task DeleteUser_WhenAuthenticated_RemovesCurrentUser()
-    {
-        // Arrange
-        var auth0UserId = CreateAuth0UserId();
-        await SeedUserWithoutUsernameAsync(factory, auth0UserId);
-        await UpdateUsernameAsync(auth0UserId, CreateUsername());
-
-        using var deleteRequest = CreateAuthenticatedRequest(HttpMethod.Delete, "/user", auth0UserId);
-
-        // Act
-        using var deleteResponse = await client.SendAsync(deleteRequest);
-
-        // Assert
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        factory.GetDeletedAuth0UserIds().Should().Equal(auth0UserId);
-
-        using var getRequest = CreateAuthenticatedRequest(HttpMethod.Get, "/user", auth0UserId);
-        using var getResponse = await client.SendAsync(getRequest);
-
-        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var user = await getResponse.Content.ReadFromJsonAsync<UserDto>();
-        user.Should().NotBeNull();
-        user.Username.Should().BeNull();
-        user.NeedsUsername.Should().BeTrue();
     }
 
     private async Task<UserDto> UpdateUsernameAsync(string auth0UserId, string username)
