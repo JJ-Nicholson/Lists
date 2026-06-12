@@ -1064,12 +1064,6 @@ a.highlight:active {
     }
 }
 
-@media (max-width: 64em) and (orientation: portrait) {
-    .home__cta {
-        min-height: auto;
-    }
-}
-
 /* 768px / 16px = 48em */
 @media (max-width: 48em) {
     :root {
