@@ -35,7 +35,9 @@ export default function RequireUsername() {
                     return;
                 }
 
-                setError("Could not load your profile.");
+                setError(
+                    "Could not check your profile. Refresh the page and try again.",
+                );
             }
         }
 

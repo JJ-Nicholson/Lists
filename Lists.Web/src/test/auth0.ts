@@ -1,7 +1,13 @@
-import type { Auth0ContextInterface, User } from "@auth0/auth0-react";
+import type {
+    Auth0ContextInterface,
+    Auth0ProviderOptions,
+    User,
+} from "@auth0/auth0-react";
 import { vi } from "vitest";
 
 export type Auth0MockOverrides = Partial<Auth0ContextInterface<User>>;
+
+let auth0ProviderProps: Auth0ProviderOptions<User> | null = null;
 
 function createAuth0Mock(
     overrides: Auth0MockOverrides = {},
@@ -26,8 +32,22 @@ function createAuth0Mock(
 
 let auth0Mock = createAuth0Mock();
 
+export function getAuth0ProviderProps(): Auth0ProviderOptions<User> {
+    if (!auth0ProviderProps) {
+        throw new Error("Auth0Provider was not rendered.");
+    }
+
+    return auth0ProviderProps;
+}
+
 export function getAuth0Mock(): Auth0ContextInterface<User> {
     return auth0Mock;
+}
+
+export function setAuth0ProviderProps(
+    props: Auth0ProviderOptions<User>,
+): void {
+    auth0ProviderProps = props;
 }
 
 export function setAuth0Mock(
@@ -40,4 +60,5 @@ export function setAuth0Mock(
 
 export function resetAuth0Mock(): void {
     auth0Mock = createAuth0Mock();
+    auth0ProviderProps = null;
 }

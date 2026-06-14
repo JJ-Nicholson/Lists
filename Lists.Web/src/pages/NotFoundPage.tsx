@@ -13,9 +13,9 @@ export default function NotFoundPage() {
 
             <section className="content-page__section">
                 <p>
-                    Head to our{" "}
+                    Return to{" "}
                     <Link className="highlight" to="/">
-                        home page
+                        Lists
                     </Link>{" "}
                     to continue your search.
                 </p>

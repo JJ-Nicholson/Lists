@@ -2,6 +2,7 @@ import type { KeyboardEvent, ReactNode } from "react";
 import { useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { FocusTrap } from "focus-trap-react";
+
 import { Button } from "./Button";
 
 type ModalProps = {

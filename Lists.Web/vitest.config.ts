@@ -8,6 +8,16 @@ export default defineConfig({
         babel({ presets: [reactCompilerPreset()] }),
     ],
     test: {
+        coverage: {
+            provider: "v8",
+            include: ["src/**/*.{ts,tsx}"],
+            exclude: [
+                "src/**/*.test.{ts,tsx}",
+                "src/**/*.d.ts",
+                "src/main.tsx",
+                "src/test/**",
+            ],
+        },
         environment: "jsdom",
         setupFiles: "./src/test/setup.ts",
     },

@@ -14,8 +14,16 @@ type ReturnToState = {
     returnTo?: ReturnToLocation;
 };
 
+function isBlockedReturnPath(pathname: string): boolean {
+    return pathname === "/auth/callback";
+}
+
 function getLocationPath(location: ReturnToLocation): string | undefined {
     if (typeof location.pathname !== "string") {
+        return undefined;
+    }
+
+    if (isBlockedReturnPath(location.pathname)) {
         return undefined;
     }
 
@@ -25,16 +33,17 @@ function getLocationPath(location: ReturnToLocation): string | undefined {
     return `${location.pathname}${search}${hash}`;
 }
 
-function getReturnTo(locationState: unknown): string {
+function getReturnTo(
+    locationState: unknown,
+    currentLocation: ReturnToLocation,
+): string {
     const state = locationState as ReturnToState | null;
     const savedReturnTo = state?.returnTo
         ? getLocationPath(state.returnTo)
         : undefined;
+    const currentReturnTo = getLocationPath(currentLocation);
 
-    return (
-        savedReturnTo ??
-        `${window.location.pathname}${window.location.search}${window.location.hash}`
-    );
+    return savedReturnTo ?? currentReturnTo ?? "/lists";
 }
 
 export default function Header(): ReactElement {
@@ -49,7 +58,7 @@ export default function Header(): ReactElement {
 
     function login(): void {
         loginWithRedirect({
-            appState: { returnTo: getReturnTo(location.state) },
+            appState: { returnTo: getReturnTo(location.state, location) },
         });
     }
 
@@ -69,7 +78,7 @@ export default function Header(): ReactElement {
     return (
         <header className="site-header">
             <ButtonLink
-                aria-label="Lists home"
+                aria-label="Lists"
                 className="site-header__brand"
                 size="large"
                 to={brandTo}

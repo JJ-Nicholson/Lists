@@ -83,10 +83,12 @@ export function useListsPageData({
                 }
 
                 if (loadError instanceof ApiError && loadError.status === 400) {
+                    setListsPage(null);
                     setError(loadError.message);
                     return;
                 }
 
+                setListsPage(null);
                 setError("Could not load lists.");
             } finally {
                 if (!controller.signal.aborted) {

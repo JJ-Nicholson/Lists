@@ -4,18 +4,18 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, type InitialEntry } from "react-router";
 
 import { setAuth0Mock, type Auth0MockOverrides } from "./auth0";
 
 type TestRenderOptions = RenderOptions & {
     auth0?: Auth0MockOverrides;
-    route?: string;
+    route?: InitialEntry;
 };
 
 type TestProvidersProps = {
     children: ReactNode;
-    route: string;
+    route: InitialEntry;
 };
 
 function TestProviders({ children, route }: TestProvidersProps) {
