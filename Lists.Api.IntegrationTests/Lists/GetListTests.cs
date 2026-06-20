@@ -72,6 +72,46 @@ public class GetListTests : EndpointTestBase
         listDetails.TotalAmount.Should().Be(7.75m);
     }
 
+    // Verifies status sort groups by completion state and sorts ties by item name.
+    [Theory]
+    [InlineData("asc", "Apples", "Zucchini", "Bread", "Yogurt")]
+    [InlineData("desc", "Bread", "Yogurt", "Apples", "Zucchini")]
+    public async Task GetList_WhenSortingByStatus_TiesByName(
+        string sortDirection,
+        string firstItem,
+        string secondItem,
+        string thirdItem,
+        string fourthItem)
+    {
+        // Arrange
+        var auth0UserId = CreateAuth0UserId();
+        var currentUser = await SeedUserAsync(factory, auth0UserId, CreateUsername());
+        var list = await SeedListAsync(factory, currentUser, "Groceries");
+        await SeedItemAsync(factory, list, "Zucchini", 1m);
+        await SeedItemAsync(factory, list, "Apples", 1m);
+        await SeedItemAsync(factory, list, "Yogurt", 1m, isCompleted: true);
+        await SeedItemAsync(factory, list, "Bread", 1m, isCompleted: true);
+
+        using var request = CreateAuthenticatedRequest(
+            HttpMethod.Get,
+            $"/lists/{list.Id}?sortBy=status&sortDirection={sortDirection}",
+            auth0UserId);
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var listDetails = await response.Content.ReadFromJsonAsync<ListDetailsDto>();
+        listDetails.Should().NotBeNull();
+        listDetails.Items.Select(i => i.Name).Should().Equal(
+            firstItem,
+            secondItem,
+            thirdItem,
+            fourthItem);
+    }
+
     // Verifies reading a missing list returns not found.
     [Fact]
     public async Task GetList_WhenListDoesNotExist_ReturnsNotFound()

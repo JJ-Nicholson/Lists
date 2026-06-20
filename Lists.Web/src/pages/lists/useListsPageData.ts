@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ApiError } from "../../api/client";
 import { getListsPage, type ListsPage } from "../../api/lists";
 import { useAccessToken } from "../../auth/useAccessToken";
 import type { SortDirection } from "./listsPageConfig";
 import { getListsQueryParams } from "./listsPageQuery";
-import type { UpdateListSearchParams } from "./useListsSearchParams";
+import type { UpdateListsSearchParams } from "./useListsSearchParams";
 
 type UseListsPageDataParams = {
     page: number;
     pageSize: number;
     search: string;
     sortDirection: SortDirection;
-    updateListSearchParams: UpdateListSearchParams;
+    updateListsSearchParams: UpdateListsSearchParams;
 };
 
 type UseListsPageDataResult = {
@@ -21,7 +21,7 @@ type UseListsPageDataResult = {
     isLoading: boolean;
     lists: ListsPage["lists"];
     pageInfo: ListsPage["page"] | undefined;
-    refreshListsPage: () => Promise<void>;
+    refreshListsPage: () => Promise<ListsPage | null>;
 };
 
 function isAbortError(error: unknown): boolean {
@@ -33,12 +33,13 @@ export function useListsPageData({
     pageSize,
     search,
     sortDirection,
-    updateListSearchParams,
+    updateListsSearchParams,
 }: UseListsPageDataParams): UseListsPageDataResult {
     const getAccessToken = useAccessToken();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [listsPage, setListsPage] = useState<ListsPage | null>(null);
+    const requestControllerRef = useRef<AbortController | null>(null);
 
     const hasLoadedLists = listsPage !== null;
     const lists = listsPage?.lists ?? [];
@@ -48,15 +49,18 @@ export function useListsPageData({
         setListsPage(loadedListsPage);
 
         if (loadedListsPage.page.page !== page) {
-            updateListSearchParams(
+            updateListsSearchParams(
                 { page: loadedListsPage.page.page },
                 { resetPage: false, replace: true },
             );
         }
-    }, [page, updateListSearchParams]);
+    }, [page, updateListsSearchParams]);
 
     useEffect(() => {
+        requestControllerRef.current?.abort();
+
         const controller = new AbortController();
+        requestControllerRef.current = controller;
 
         async function loadLists(): Promise<void> {
             setIsLoading(true);
@@ -74,24 +78,27 @@ export function useListsPageData({
                     { accessToken, signal: controller.signal },
                 );
 
-                if (!controller.signal.aborted) {
+                if (requestControllerRef.current === controller) {
                     applyListsPage(loadedListsPage);
                 }
             } catch (loadError) {
-                if (isAbortError(loadError)) {
+                if (
+                    requestControllerRef.current !== controller ||
+                    controller.signal.aborted ||
+                    isAbortError(loadError)
+                ) {
                     return;
                 }
 
                 if (loadError instanceof ApiError && loadError.status === 400) {
-                    setListsPage(null);
                     setError(loadError.message);
                     return;
                 }
 
-                setListsPage(null);
                 setError("Could not load lists.");
             } finally {
-                if (!controller.signal.aborted) {
+                if (requestControllerRef.current === controller) {
+                    requestControllerRef.current = null;
                     setIsLoading(false);
                 }
             }
@@ -100,28 +107,53 @@ export function useListsPageData({
         loadLists();
 
         return () => {
-            controller.abort();
+            requestControllerRef.current?.abort();
+            requestControllerRef.current = null;
         };
     }, [applyListsPage, getAccessToken, page, pageSize, search, sortDirection]);
 
-    async function refreshListsPage(): Promise<void> {
+    async function refreshListsPage(): Promise<ListsPage | null> {
+        requestControllerRef.current?.abort();
+
+        const controller = new AbortController();
+        requestControllerRef.current = controller;
+        setIsLoading(true);
         setError("");
 
         try {
             const accessToken = await getAccessToken();
             const updatedListsPage = await getListsPage(
                 getListsQueryParams({ page, pageSize, search, sortDirection }),
-                { accessToken },
+                { accessToken, signal: controller.signal },
             );
 
+            if (requestControllerRef.current !== controller) {
+                return null;
+            }
+
             applyListsPage(updatedListsPage);
+            return updatedListsPage;
         } catch (refreshError) {
+            if (
+                requestControllerRef.current !== controller ||
+                controller.signal.aborted ||
+                isAbortError(refreshError)
+            ) {
+                return null;
+            }
+
             if (refreshError instanceof ApiError && refreshError.status === 400) {
                 setError(refreshError.message);
-                return;
+                return null;
             }
 
             setError("Could not refresh lists.");
+            return null;
+        } finally {
+            if (requestControllerRef.current === controller) {
+                requestControllerRef.current = null;
+                setIsLoading(false);
+            }
         }
     }
 

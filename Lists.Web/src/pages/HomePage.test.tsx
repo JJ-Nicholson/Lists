@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { render, screen } from "../test/render";
+import { render, screen, within } from "../test/render";
 import HomePage from "./HomePage";
 
 describe("HomePage", () => {
@@ -38,23 +38,43 @@ describe("HomePage", () => {
             },
         });
 
-        expect(screen.getByRole("heading", { name: "Lists" }))
+        const listsPreview = screen.getByRole("region", {
+            name: "Lists page preview",
+        });
+        const listPreview = screen.getByRole("region", {
+            name: "List page preview",
+        });
+
+        expect(within(listsPreview).getByRole("heading", { name: "Your Lists" }))
             .toBeInTheDocument();
-        expect(screen.getByRole("region", { name: "Lists page preview" }))
-            .toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Create List" }))
+        expect(within(listsPreview).getByRole("button", { name: "Create List" }))
             .toBeDisabled();
-        expect(screen.getByLabelText("Search")).toBeDisabled();
-        expect(screen.getByLabelText("Sort alphabetically")).toBeDisabled();
-        expect(screen.getByLabelText("Per page")).toBeDisabled();
-        expect(screen.getByRole("button", { name: "Edit To-Do List" }))
+        expect(within(listsPreview).getByLabelText("Search")).toBeDisabled();
+        expect(within(listsPreview).getByLabelText("Sort alphabetically"))
+            .toBeDisabled();
+        expect(within(listsPreview).getByLabelText("Per page")).toBeDisabled();
+        expect(within(listsPreview).getByRole("button", { name: "Edit To-Do List" }))
             .toBeDisabled();
         expect(
-            screen.getByRole("button", { name: "Review access to To-Do List" }),
+            within(listsPreview).getByRole("button", {
+                name: "Review access to To-Do List",
+            }),
         ).toBeDisabled();
-        expect(screen.getByRole("button", { name: "Delete To-Do List" }))
+        expect(within(listsPreview).getByRole("button", { name: "Delete To-Do List" }))
             .toBeDisabled();
-        expect(screen.queryByRole("link", { name: "Open To-Do List" }))
+        expect(within(listsPreview).queryByRole("link", { name: "Open To-Do List" }))
             .not.toBeInTheDocument();
+
+        expect(within(listPreview).getByRole("heading", { name: "Weekly Shop" }))
+            .toBeInTheDocument();
+        expect(within(listPreview).getByRole("button", { name: "Back to Lists" }))
+            .toBeDisabled();
+        expect(within(listPreview).getByRole("button", { name: "Add Entry" }))
+            .toBeDisabled();
+        expect(within(listPreview).getByLabelText("Search")).toBeDisabled();
+        expect(within(listPreview).getByLabelText("Filter by")).toBeDisabled();
+        expect(within(listPreview).getByRole("checkbox", {
+            name: "Mark Coffee Beans as completed",
+        })).toBeDisabled();
     });
 });

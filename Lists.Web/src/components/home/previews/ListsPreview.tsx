@@ -19,7 +19,7 @@ const previewLists: ListSummary[] = [
     {
         id: 3,
         name: "Hardware Run",
-        unitLabel: "NZD",
+        unitLabel: "$",
         version: 1,
         completedItemCount: 1,
         itemCount: 5,
@@ -39,7 +39,7 @@ const previewLists: ListSummary[] = [
     {
         id: 2,
         name: "Weekly Shop",
-        unitLabel: "NZD",
+        unitLabel: "$",
         version: 1,
         completedItemCount: 0,
         itemCount: 4,
@@ -50,7 +50,7 @@ const previewLists: ListSummary[] = [
 
 const previewPageInfo: ListsPageInfo = {
     page: 1,
-    pageSize: 6,
+    pageSize: 12,
     totalCount: previewLists.length,
     totalPages: 1,
 };
@@ -74,6 +74,7 @@ export default function ListsPreview() {
 
             <ListsGrid
                 disabled
+                emptyMessage="No lists here!"
                 lists={previewLists}
                 onDeleteList={handlePreviewAction}
                 onEditList={handlePreviewAction}

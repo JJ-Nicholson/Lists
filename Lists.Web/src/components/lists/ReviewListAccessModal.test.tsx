@@ -25,6 +25,10 @@ function accessUrl(listId: number): string {
     return buildApiUrl(`/lists/${listId}/access`).toString();
 }
 
+function reloadList(): Promise<boolean> {
+    return Promise.resolve(true);
+}
+
 function mockAccessEntries(
     list: ListSummary,
     entries: ListAccessEntry[],
@@ -45,7 +49,11 @@ describe("ReviewListAccessModal", () => {
         ]);
 
         render(
-            <ReviewListAccessModal list={list} onClose={() => {}} />,
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
         );
 
         const accessItems = await screen.findAllByRole("listitem");
@@ -63,7 +71,11 @@ describe("ReviewListAccessModal", () => {
         ]);
 
         render(
-            <ReviewListAccessModal list={list} onClose={() => {}} />,
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
         );
 
         expect(await screen.findByText("josh")).toBeInTheDocument();
@@ -95,7 +107,11 @@ describe("ReviewListAccessModal", () => {
             }),
         );
         const { user } = render(
-            <ReviewListAccessModal list={list} onClose={() => {}} />,
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
         );
 
         expect(await screen.findByText("josh")).toBeInTheDocument();
@@ -128,7 +144,11 @@ describe("ReviewListAccessModal", () => {
             }),
         );
         const { user } = render(
-            <ReviewListAccessModal list={list} onClose={() => {}} />,
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
         );
 
         expect(await screen.findByText("alex")).toBeInTheDocument();
@@ -155,11 +175,15 @@ describe("ReviewListAccessModal", () => {
         );
 
         render(
-            <ReviewListAccessModal list={list} onClose={() => {}} />,
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
         );
 
         expect(await screen.findByRole("alert")).toHaveTextContent(
-            "List not found.",
+            "This list does not exist, was deleted, or you no longer have access.",
         );
     });
 });

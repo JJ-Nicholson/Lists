@@ -1,30 +1,34 @@
 import type { SubmitEvent } from "react";
 import { useState } from "react";
 
-import { ApiError } from "../../api/client";
+import {
+    getListActionErrorMessage,
+    isListNotFoundError,
+    isListReloadableError,
+} from "../../api/errorMessages";
 import { deleteList, type ListSummary } from "../../api/lists";
 import { useAccessToken } from "../../auth/useAccessToken";
 import { Button } from "../Button";
+import type { MaybePromise } from "../callbackTypes";
 import Modal from "../Modal";
 
 type DeleteListModalProps = {
     list: ListSummary;
     onClose: () => void;
-    onListDeleted: () => Promise<void> | void;
+    onListDeleted: () => MaybePromise<unknown>;
+    onReloadList: (list: ListSummary) => MaybePromise<unknown>;
 };
-
-function getErrorMessage(error: unknown, fallbackMessage: string): string {
-    return error instanceof ApiError ? error.message : fallbackMessage;
-}
 
 export default function DeleteListModal({
     list,
     onClose,
     onListDeleted,
+    onReloadList,
 }: DeleteListModalProps) {
     const getAccessToken = useAccessToken();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalError, setModalError] = useState("");
+    const [canReloadList, setCanReloadList] = useState(false);
 
     function closeDeleteModal(): void {
         if (isSubmitting) {
@@ -46,13 +50,36 @@ export default function DeleteListModal({
             const accessToken = await getAccessToken();
             await deleteList(list.id, list.version, { accessToken });
         } catch (error) {
-            setModalError(getErrorMessage(error, "Could not delete list."));
+            if (isListNotFoundError(error)) {
+                onClose();
+                await onListDeleted();
+                return;
+            }
+
+            setModalError(
+                getListActionErrorMessage(error, "Could not delete list."),
+            );
+            setCanReloadList(isListReloadableError(error));
             setIsSubmitting(false);
             return;
         }
 
         onClose();
         await onListDeleted();
+    }
+
+    async function handleReloadList(): Promise<void> {
+        setIsSubmitting(true);
+        setModalError("");
+
+        try {
+            await onReloadList(list);
+            setIsSubmitting(false);
+        } catch {
+            setModalError("Could not reload list.");
+            setCanReloadList(true);
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -62,14 +89,20 @@ export default function DeleteListModal({
                     <Button disabled={isSubmitting} onClick={closeDeleteModal}>
                         Cancel
                     </Button>
-                    <Button
-                        disabled={isSubmitting}
-                        form="delete-list-form"
-                        type="submit"
-                        variant="danger"
-                    >
-                        {isSubmitting ? "Deleting..." : "Delete"}
-                    </Button>
+                    {canReloadList ? (
+                        <Button disabled={isSubmitting} onClick={handleReloadList}>
+                            {isSubmitting ? "Reloading Lists..." : "Reload Lists"}
+                        </Button>
+                    ) : (
+                        <Button
+                            disabled={isSubmitting}
+                            form="delete-list-form"
+                            type="submit"
+                            variant="danger"
+                        >
+                            {isSubmitting ? "Deleting..." : "Delete"}
+                        </Button>
+                    )}
                 </>
             }
             className="delete-list-modal"

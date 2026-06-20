@@ -21,6 +21,7 @@ function createList(overrides: Partial<ListSummary> = {}): ListSummary {
 function renderListsGrid(lists: ListSummary[] = []) {
     return render(
         <ListsGrid
+            emptyMessage="No lists here!"
             lists={lists}
             onDeleteList={() => {}}
             onEditList={() => {}}
@@ -33,6 +34,7 @@ describe("ListsGrid", () => {
     it("shows a loading message while lists are loading", () => {
         render(
             <ListsGrid
+                emptyMessage={null}
                 isLoading
                 lists={[]}
                 onDeleteList={() => {}}
@@ -47,6 +49,7 @@ describe("ListsGrid", () => {
     it("renders nothing when lists have not loaded and are not loading", () => {
         const { container } = render(
             <ListsGrid
+                emptyMessage={null}
                 hasLoadedLists={false}
                 lists={[]}
                 onDeleteList={() => {}}
@@ -85,6 +88,7 @@ describe("ListsGrid", () => {
         const onReviewAccess = vi.fn();
         const { user } = render(
             <ListsGrid
+                emptyMessage="No lists here!"
                 lists={[list]}
                 onDeleteList={onDeleteList}
                 onEditList={onEditList}

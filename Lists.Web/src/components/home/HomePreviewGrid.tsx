@@ -1,3 +1,4 @@
+import ListPreview from "./previews/ListPreview";
 import ListsPreview from "./previews/ListsPreview";
 
 export default function HomePreviewGrid() {
@@ -5,6 +6,9 @@ export default function HomePreviewGrid() {
         <div className="home__previews">
             <article>
                 <ListsPreview />
+            </article>
+            <article>
+                <ListPreview />
             </article>
         </div>
     );

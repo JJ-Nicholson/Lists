@@ -7,54 +7,54 @@ import {
 
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import {
-    DEFAULT_LISTS_PAGE_SIZE,
-    DEFAULT_PAGE,
+    DEFAULT_ITEM_SORT,
+    DEFAULT_ITEM_STATUS,
     DEFAULT_SORT_DIRECTION,
     SEARCH_DEBOUNCE_MS,
+    type ItemSort,
+    type ItemStatus,
     type SortDirection,
-} from "./listsPageConfig";
+} from "./listPageConfig";
 import {
-    getListsPageSize,
-    getPositiveInteger,
+    getItemSortBy,
+    getItemStatus,
     getSortDirection,
-} from "./listsPageQuery";
+} from "./listPageQuery";
 
-type ListsSearchParamKey = "page" | "pageSize" | "search" | "sortDirection";
-type ListsSearchParamValue = string | number | null | undefined;
-type ListsSearchParamUpdates = Partial<
-    Record<ListsSearchParamKey, ListsSearchParamValue>
+type ListSearchParamKey = "search" | "status" | "sortBy" | "sortDirection";
+type ListSearchParamValue = string | null | undefined;
+type ListSearchParamUpdates = Partial<
+    Record<ListSearchParamKey, ListSearchParamValue>
 >;
 
-type UpdateListsSearchParamsOptions = {
-    resetPage?: boolean;
+type UpdateListSearchParamsOptions = {
     replace?: boolean;
 };
 
-export type UpdateListsSearchParams = (
-    nextValues: ListsSearchParamUpdates,
-    options?: UpdateListsSearchParamsOptions,
+type UpdateListSearchParams = (
+    nextValues: ListSearchParamUpdates,
+    options?: UpdateListSearchParamsOptions,
 ) => void;
 
-type UseListsSearchParamsResult = {
-    page: number;
-    pageSize: number;
+type UseListSearchParamsResult = {
     search: string;
     searchInput: string;
+    status: ItemStatus;
+    sortBy: ItemSort;
     sortDirection: SortDirection;
-    updateListsSearchParams: UpdateListsSearchParams;
-    handlePageChange: (nextPage: number) => void;
-    handlePageSizeChange: (nextPageSize: number) => void;
     handleSearchChange: (value: string) => void;
+    handleStatusChange: (value: string) => void;
+    handleSortByChange: (value: string) => void;
     handleSortDirectionChange: (value: string) => void;
 };
 
-export function useListsSearchParams(): UseListsSearchParamsResult {
+export function useListSearchParams(): UseListSearchParamsResult {
     const location = useLocation();
     const navigationType = useNavigationType();
     const [searchParams, setSearchParams] = useSearchParams();
-    const page = getPositiveInteger(searchParams.get("page"), DEFAULT_PAGE);
-    const pageSize = getListsPageSize(searchParams.get("pageSize"));
     const search = searchParams.get("search") ?? "";
+    const status = getItemStatus(searchParams.get("status"));
+    const sortBy = getItemSortBy(searchParams.get("sortBy"));
     const sortDirection = getSortDirection(searchParams.get("sortDirection"));
     const [searchInput, setSearchInput] = useState(search);
     const pendingSearchParamRef = useRef<string | null>(null);
@@ -82,9 +82,9 @@ export function useListsSearchParams(): UseListsSearchParamsResult {
         setSearchInput(search);
     }, [location.key, navigationType, search]);
 
-    const updateListsSearchParams = useCallback<UpdateListsSearchParams>(
+    const updateListSearchParams = useCallback<UpdateListSearchParams>(
         (nextValues, options = {}) => {
-            const { resetPage = true, replace = false } = options;
+            const { replace = false } = options;
 
             setSearchParams(
                 (currentParams) => {
@@ -93,16 +93,21 @@ export function useListsSearchParams(): UseListsSearchParamsResult {
                     Object.entries(nextValues).forEach(([key, value]) => {
                         const shouldPreserveWhitespace = key === "search";
                         const nextValue =
-                            typeof value === "string" &&
-                            !shouldPreserveWhitespace
+                            typeof value === "string" && !shouldPreserveWhitespace
                                 ? value.trim()
                                 : value;
 
-                        if (
-                            nextValue === undefined ||
-                            nextValue === null ||
-                            nextValue === ""
-                        ) {
+                        if (!nextValue) {
+                            nextParams.delete(key);
+                            return;
+                        }
+
+                        if (key === "status" && nextValue === DEFAULT_ITEM_STATUS) {
+                            nextParams.delete(key);
+                            return;
+                        }
+
+                        if (key === "sortBy" && nextValue === DEFAULT_ITEM_SORT) {
                             nextParams.delete(key);
                             return;
                         }
@@ -115,28 +120,8 @@ export function useListsSearchParams(): UseListsSearchParamsResult {
                             return;
                         }
 
-                        if (
-                            key === "page" &&
-                            Number(nextValue) === DEFAULT_PAGE
-                        ) {
-                            nextParams.delete(key);
-                            return;
-                        }
-
-                        if (
-                            key === "pageSize" &&
-                            Number(nextValue) === DEFAULT_LISTS_PAGE_SIZE
-                        ) {
-                            nextParams.delete(key);
-                            return;
-                        }
-
                         nextParams.set(key, String(nextValue));
                     });
-
-                    if (resetPage) {
-                        nextParams.delete("page");
-                    }
 
                     return nextParams;
                 },
@@ -167,39 +152,39 @@ export function useListsSearchParams(): UseListsSearchParamsResult {
         }
 
         pendingSearchParamRef.current = debouncedSearch;
-        updateListsSearchParams(
+        updateListSearchParams(
             { search: debouncedSearch },
             { replace: true },
         );
-    }, [debouncedSearch, search, searchInput, updateListsSearchParams]);
+    }, [debouncedSearch, search, searchInput, updateListSearchParams]);
+
+    function handleStatusChange(value: string): void {
+        updateListSearchParams({
+            status: getItemStatus(value),
+        });
+    }
+
+    function handleSortByChange(value: string): void {
+        updateListSearchParams({
+            sortBy: getItemSortBy(value),
+        });
+    }
 
     function handleSortDirectionChange(value: string): void {
-        updateListsSearchParams({
+        updateListSearchParams({
             sortDirection: getSortDirection(value),
         });
     }
 
-    function handlePageChange(nextPage: number): void {
-        updateListsSearchParams(
-            { page: nextPage },
-            { resetPage: false },
-        );
-    }
-
-    function handlePageSizeChange(nextPageSize: number): void {
-        updateListsSearchParams({ pageSize: nextPageSize });
-    }
-
     return {
-        page,
-        pageSize,
         search,
         searchInput,
+        status,
+        sortBy,
         sortDirection,
-        updateListsSearchParams,
-        handlePageChange,
-        handlePageSizeChange,
         handleSearchChange,
+        handleStatusChange,
+        handleSortByChange,
         handleSortDirectionChange,
     };
 }

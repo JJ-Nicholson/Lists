@@ -5,11 +5,12 @@ import { ApiError } from "../../api/client";
 import { createList } from "../../api/lists";
 import { useAccessToken } from "../../auth/useAccessToken";
 import { Button } from "../Button";
+import type { MaybePromise } from "../callbackTypes";
 import Modal from "../Modal";
 
 type CreateListModalProps = {
     onClose: () => void;
-    onListCreated: () => Promise<void> | void;
+    onListCreated: () => MaybePromise<unknown>;
 };
 
 function getErrorMessage(error: unknown, fallbackMessage: string): string {

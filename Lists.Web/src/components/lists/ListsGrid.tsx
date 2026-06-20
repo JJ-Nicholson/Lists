@@ -3,6 +3,7 @@ import ListCard from "./ListCard";
 
 type ListsGridProps = {
     disabled?: boolean;
+    emptyMessage: string | null;
     hasLoadedLists?: boolean;
     isLoading?: boolean;
     lists: ListSummary[];
@@ -13,6 +14,7 @@ type ListsGridProps = {
 
 export default function ListsGrid({
     disabled = false,
+    emptyMessage,
     hasLoadedLists = true,
     isLoading = false,
     lists,
@@ -27,6 +29,10 @@ export default function ListsGrid({
     }
 
     if (!hasLoadedLists) {
+        return null;
+    }
+
+    if (!hasLists && !emptyMessage) {
         return null;
     }
 
@@ -46,7 +52,7 @@ export default function ListsGrid({
                     ))}
                 </div>
             ) : (
-                <p>No lists here!</p>
+                <p>{emptyMessage}</p>
             )}
         </div>
     );

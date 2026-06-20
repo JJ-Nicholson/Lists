@@ -28,6 +28,7 @@ describe("DeleteListModal", () => {
                 list={createList()}
                 onClose={() => {}}
                 onListDeleted={() => {}}
+                onReloadList={() => {}}
             />,
         );
 
@@ -55,6 +56,7 @@ describe("DeleteListModal", () => {
                 list={list}
                 onClose={onClose}
                 onListDeleted={onListDeleted}
+                onReloadList={() => {}}
             />,
         );
 
@@ -83,6 +85,7 @@ describe("DeleteListModal", () => {
                 list={list}
                 onClose={() => {}}
                 onListDeleted={() => {}}
+                onReloadList={() => {}}
             />,
         );
 

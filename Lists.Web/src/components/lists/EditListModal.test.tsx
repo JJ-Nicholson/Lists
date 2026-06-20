@@ -28,6 +28,7 @@ describe("EditListModal", () => {
                 list={createList()}
                 onClose={() => {}}
                 onListUpdated={() => {}}
+                onReloadList={() => {}}
             />,
         );
 
@@ -63,6 +64,7 @@ describe("EditListModal", () => {
                 list={list}
                 onClose={onClose}
                 onListUpdated={onListUpdated}
+                onReloadList={() => {}}
             />,
         );
 
@@ -100,13 +102,15 @@ describe("EditListModal", () => {
                 list={list}
                 onClose={() => {}}
                 onListUpdated={() => {}}
+                onReloadList={() => {}}
             />,
         );
 
         await user.click(screen.getByRole("button", { name: "Save" }));
 
         expect(await screen.findByRole("alert")).toHaveTextContent(
-            "List was modified. Reload and try again.",
+            "This list has been modified since you last checked. " +
+                "Reload to see what changed before making further changes.",
         );
     });
 });

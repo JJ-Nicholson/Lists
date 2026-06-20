@@ -1,7 +1,10 @@
 import type { SubmitEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ApiError } from "../../api/client";
+import {
+    getListActionErrorMessage,
+    isListNotFoundError,
+} from "../../api/errorMessages";
 import {
     getListAccess,
     grantListAccess,
@@ -18,13 +21,16 @@ import { useAccessToken } from "../../auth/useAccessToken";
 import { Button } from "../Button";
 import Modal from "../Modal";
 
+type ReloadTarget = "access" | "lists";
+
 type ReviewListAccessModalProps = {
     list: ListSummary;
     onClose: () => void;
+    onReloadList: (list: ListSummary) => Promise<boolean>;
 };
 
 function getErrorMessage(error: unknown, fallbackMessage: string): string {
-    return error instanceof ApiError ? error.message : fallbackMessage;
+    return getListActionErrorMessage(error, fallbackMessage);
 }
 
 function isAbortError(error: unknown): boolean {
@@ -51,10 +57,12 @@ function sortAccessEntries(
 export default function ReviewListAccessModal({
     list,
     onClose,
+    onReloadList,
 }: ReviewListAccessModalProps) {
     const getAccessToken = useAccessToken();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [reloadTarget, setReloadTarget] = useState<ReloadTarget | null>(null);
     const [accessEntries, setAccessEntries] = useState<ListAccessEntry[]>([]);
     const [username, setUsername] = useState("");
     const [revokingUsername, setRevokingUsername] = useState("");
@@ -80,6 +88,7 @@ export default function ReviewListAccessModal({
         loadControllerRef.current = controller;
         setIsLoading(true);
         setError("");
+        setReloadTarget(null);
 
         try {
             const accessToken = await getAccessToken();
@@ -92,13 +101,20 @@ export default function ReviewListAccessModal({
                 setAccessEntries(sortAccessEntries(loadedAccessEntries));
             }
         } catch (loadError) {
-            if (isAbortError(loadError)) {
+            if (
+                loadControllerRef.current !== controller ||
+                signal.aborted ||
+                isAbortError(loadError)
+            ) {
                 return;
             }
 
             if (isMountedRef.current) {
                 setError(
                     getErrorMessage(loadError, "Could not load list access."),
+                );
+                setReloadTarget(
+                    isListNotFoundError(loadError) ? "lists" : "access",
                 );
             }
         } finally {
@@ -144,11 +160,13 @@ export default function ReviewListAccessModal({
 
         if (!trimmedUsername) {
             setError("Enter a username.");
+            setReloadTarget(null);
             return;
         }
 
         setIsGranting(true);
         setError("");
+        setReloadTarget(null);
 
         try {
             const accessToken = await getAccessToken();
@@ -164,6 +182,9 @@ export default function ReviewListAccessModal({
                 setError(
                     getErrorMessage(grantError, "Could not grant list access."),
                 );
+                setReloadTarget(
+                    isListNotFoundError(grantError) ? "lists" : null,
+                );
             }
         } finally {
             if (isMountedRef.current) {
@@ -175,6 +196,7 @@ export default function ReviewListAccessModal({
     async function handleRevokeAccess(targetUsername: string): Promise<void> {
         setRevokingUsername(targetUsername);
         setError("");
+        setReloadTarget(null);
 
         try {
             const accessToken = await getAccessToken();
@@ -189,10 +211,40 @@ export default function ReviewListAccessModal({
                 setError(
                     getErrorMessage(revokeError, "Could not revoke list access."),
                 );
+                setReloadTarget(
+                    isListNotFoundError(revokeError) ? "lists" : null,
+                );
             }
         } finally {
             if (isMountedRef.current) {
                 setRevokingUsername("");
+            }
+        }
+    }
+
+    async function handleReload(): Promise<void> {
+        if (reloadTarget === "access") {
+            await loadAccessEntries();
+            return;
+        }
+
+        setIsLoading(true);
+        setError("");
+
+        try {
+            const listIsAvailable = await onReloadList(list);
+
+            if (listIsAvailable && isMountedRef.current) {
+                await loadAccessEntries();
+            }
+        } catch {
+            if (isMountedRef.current) {
+                setError("Could not reload lists.");
+                setReloadTarget("lists");
+            }
+        } finally {
+            if (isMountedRef.current) {
+                setIsLoading(false);
             }
         }
     }
@@ -211,7 +263,21 @@ export default function ReviewListAccessModal({
 
                 {isLoading && <p>Loading...</p>}
 
-                {error && (
+                {error && reloadTarget && (
+                    <div className="modal-error">
+                        <p className="modal-form__error" role="alert">
+                            {error}
+                        </p>
+                        <Button
+                            disabled={isBusy}
+                            onClick={handleReload}
+                        >
+                            {reloadTarget === "lists" ? "Reload Lists" : "Reload"}
+                        </Button>
+                    </div>
+                )}
+
+                {error && !reloadTarget && (
                     <p className="modal-form__error" role="alert">
                         {error}
                     </p>

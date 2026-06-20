@@ -25,7 +25,7 @@ describe("ListCard", () => {
         expect(
             screen.getByRole("heading", { name: "Groceries" }),
         ).toBeInTheDocument();
-        expect(screen.getByText("2 of 5 items completed")).toBeInTheDocument();
+        expect(screen.getByText("2 of 5 completed")).toBeInTheDocument();
         expect(screen.getByText("Units: items")).toBeInTheDocument();
         expect(screen.getByText("You own this list")).toBeInTheDocument();
     });

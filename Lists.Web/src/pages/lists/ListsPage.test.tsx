@@ -1,18 +1,18 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import { buildApiUrl } from "../api/client";
+import { buildApiUrl } from "../../api/client";
 import type {
     ListSummary,
     ListsPage as ListsPageResponse,
-} from "../api/lists";
+} from "../../api/lists";
 import {
     DEFAULT_PAGE,
     DEFAULT_LISTS_PAGE_SIZE,
     DEFAULT_SORT_DIRECTION,
-} from "./lists/listsPageConfig";
-import { render, screen, waitFor } from "../test/render";
-import { server } from "../test/server";
+} from "./listsPageConfig";
+import { render, screen, waitFor } from "../../test/render";
+import { server } from "../../test/server";
 import ListsPage from "./ListsPage";
 
 const listsUrl = buildApiUrl("/lists").toString();
@@ -314,7 +314,7 @@ describe("ListsPage", () => {
         expect(requests[1].searchParams.get("page")).toBe("3");
     });
 
-    it("removes stale lists when a later load fails", async () => {
+    it("keeps stale lists when a later load fails", async () => {
         let requestCount = 0;
         server.use(
             http.get(listsUrl, () => {
@@ -351,10 +351,13 @@ describe("ListsPage", () => {
             "Could not load lists.",
         );
         expect(
-            screen.queryByRole("heading", { name: "Groceries" }),
-        ).not.toBeInTheDocument();
+            screen.getByRole("heading", { name: "Groceries" }),
+        ).toBeInTheDocument();
         expect(
-            screen.queryByText("Showing 1-1 of 1 list"),
-        ).not.toBeInTheDocument();
+            screen.getByText("Showing 1-1 of 1 list"),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: "Reload Lists" }),
+        ).toBeInTheDocument();
     });
 });

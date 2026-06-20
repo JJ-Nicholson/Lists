@@ -185,7 +185,7 @@ export async function createListItem(
         body: JSON.stringify(item),
     });
 
-    await throwIfResponseNotOk(response, "Failed to create list item.");
+    await throwIfResponseNotOk(response, "Failed to create list entry.");
 }
 
 export async function updateListItem(
@@ -202,7 +202,7 @@ export async function updateListItem(
         body: JSON.stringify(item),
     });
 
-    await throwIfResponseNotOk(response, "Failed to update list item.");
+    await throwIfResponseNotOk(response, "Failed to update list entry.");
 
     return response.json();
 }
@@ -221,7 +221,7 @@ export async function deleteListItem(
         },
     );
 
-    await throwIfResponseNotOk(response, "Failed to delete list item.");
+    await throwIfResponseNotOk(response, "Failed to delete list entry.");
 }
 
 export async function markListItemsComplete(
@@ -240,7 +240,7 @@ export async function markListItemsComplete(
         },
     );
 
-    await throwIfResponseNotOk(response, "Failed to mark list items complete.");
+    await throwIfResponseNotOk(response, "Failed to mark list entries complete.");
 
     return response.json();
 }
@@ -261,7 +261,7 @@ export async function markListItemsIncomplete(
         },
     );
 
-    await throwIfResponseNotOk(response, "Failed to mark list items incomplete.");
+    await throwIfResponseNotOk(response, "Failed to mark list entries incomplete.");
 
     return response.json();
 }

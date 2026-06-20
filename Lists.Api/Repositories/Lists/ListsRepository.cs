@@ -168,8 +168,14 @@ public class ListsRepository(ListsContext dbContext) : IListsRepository
                 : itemsQuery.OrderBy(i => i.Amount).ThenBy(i => i.Id),
 
             "status" => descending
-                ? itemsQuery.OrderByDescending(i => i.IsCompleted).ThenBy(i => i.Id)
-                : itemsQuery.OrderBy(i => i.IsCompleted).ThenBy(i => i.Id),
+                ? itemsQuery
+                    .OrderByDescending(i => i.IsCompleted)
+                    .ThenBy(i => i.Name)
+                    .ThenBy(i => i.Id)
+                : itemsQuery
+                    .OrderBy(i => i.IsCompleted)
+                    .ThenBy(i => i.Name)
+                    .ThenBy(i => i.Id),
 
             _ => throw new ArgumentException("Invalid item sort.", nameof(sortBy))
         };

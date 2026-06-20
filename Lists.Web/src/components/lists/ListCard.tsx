@@ -45,8 +45,7 @@ export default function ListCard({
 
             <div className="list-card__details">
                 <p>
-                    {list.completedItemCount} of {list.itemCount} items
-                    completed
+                    {list.completedItemCount} of {list.itemCount} completed
                 </p>
 
                 <p>Units: {list.unitLabel ?? "none"}</p>

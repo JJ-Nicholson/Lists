@@ -17,7 +17,7 @@ LETTER SPACING
 FONT FAMILY
 DM Mono
 
----------- COLORS ----------
+---------- COLOURS ----------
 
 PRIMARY
 Base: #efe0bc (Card / Control Surface / Modal Surface / Preview Band)
@@ -98,7 +98,7 @@ Radius: 4px / 6px / 8px / 12px / 16px
     /* FONT FAMILY */
     --font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-    /* COLORS */
+    /* COLOURS */
     --primary-base: #efe0bc;
     /* card and control surface */
     --primary-tint: #dcc59b;
@@ -428,9 +428,34 @@ a.highlight:active {
     opacity: 0.75;
 }
 
+.modal-form__checkbox-control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 4.4rem;
+    padding: 0 1.2rem;
+    border: var(--border-width) solid var(--secondary-base);
+    border-radius: var(--radius-control);
+    background-color: var(--primary-shade);
+}
+
+.modal-form__checkbox-control input {
+    flex: 0 0 auto;
+    width: 2.2rem;
+    height: 2.2rem;
+    accent-color: var(--secondary-base);
+}
+
 .modal-form__error {
     color: var(--danger-base);
     font-weight: var(--font-weight-bold);
+}
+
+.modal-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
 }
 
 .access-list {
@@ -441,7 +466,6 @@ a.highlight:active {
     overflow-y: auto;
     padding-right: 0.6rem;
 }
-
 
 .access-list__item {
     display: grid;
@@ -523,20 +547,6 @@ a.highlight:active {
     font: inherit;
     font-size: var(--font-size-med);
     background-color: var(--primary-shade);
-}
-
-.controls__field select {
-    appearance: none;
-    padding-right: 3.6rem;
-    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
-        linear-gradient(135deg, currentColor 50%, transparent 50%);
-    background-position:
-        calc(100% - 1.8rem) 50%,
-        calc(100% - 1.3rem) 50%;
-    background-size:
-        0.5rem 0.5rem,
-        0.5rem 0.5rem;
-    background-repeat: no-repeat;
 }
 
 .controls__bulk-actions {
@@ -699,6 +709,18 @@ a.highlight:active {
     /* Creates some separation between the
        heading and button on smaller screens. */
     gap: 2rem;
+}
+
+.page-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.page-error__message {
+    color: var(--danger-base);
+    font-weight: var(--font-weight-bold);
 }
 
 /* ------ FOOTER ------ */
@@ -873,15 +895,15 @@ a.highlight:active {
 
 /* All direct children of the card except for the link are above the link
    in z-index, so they remain interactive and visible. */
-.list-card--link> :not(.list-card__link) {
+.list-card--link > :not(.list-card__link) {
     position: relative;
     z-index: 2;
 }
 
 /* Blocks pointer events on the card content, so that the entire card surface
    is clickable via the link. */
-.list-card--link>.list-card__name,
-.list-card--link>.list-card__details {
+.list-card--link > .list-card__name,
+.list-card--link > .list-card__details {
     pointer-events: none;
 }
 
@@ -908,7 +930,7 @@ a.highlight:active {
     margin-top: 1rem;
 }
 
-.list-card__action--review-access+.list-card__action--edit:last-child {
+.list-card__action--review-access + .list-card__action--edit:last-child {
     grid-column: 1 / -1;
 }
 
@@ -922,6 +944,13 @@ a.highlight:active {
 
 .list__name {
     overflow-wrap: anywhere;
+}
+
+.list-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 1rem;
 }
 
 .list-items {
@@ -985,6 +1014,26 @@ a.highlight:active {
     grid-area: actions;
     justify-self: end;
     gap: 1rem;
+}
+
+.list-total {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: var(--border-width) solid var(--secondary-base);
+}
+
+.list-total__label {
+    font-size: var(--font-size-lrg);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+}
+
+.list-total__amount {
+    font-size: var(--font-size-lrg);
+    font-weight: var(--font-weight-bold);
 }
 
 /* ------ DEFAULT CONTENT PAGES (PRIVACY, NOT FOUND, SETUP PROFILE) ------ */
@@ -1147,6 +1196,24 @@ a.highlight:active {
 
     .list-item-row__actions .button {
         flex: 1 1 0;
+    }
+
+    .page-error {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .page-error .button {
+        width: 100%;
+    }
+
+    .modal-error {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .modal-error .button {
+        width: 100%;
     }
 
     .modal {
