@@ -71,6 +71,7 @@ function ListPageContent({ listId }: ListPageContentProps) {
         clearMutationError,
         isMutatingItems,
         mutationError,
+        mutationErrorItemId,
         handleItemCompletedChange,
         handleMarkAllItemsComplete,
         handleMarkAllItemsIncomplete,
@@ -84,7 +85,8 @@ function ListPageContent({ listId }: ListPageContentProps) {
     const isFiltered = status !== "all" || search.trim().length > 0;
     const hasIncompleteItems = items.some((item) => !item.isCompleted);
     const hasCompletedItems = items.some((item) => item.isCompleted);
-    const pageError = mutationError || error;
+    const itemMutationError = mutationErrorItemId === null ? "" : mutationError;
+    const pageError = error || (mutationErrorItemId === null ? mutationError : "");
     const itemsEmptyMessage =
         isLoading || pageError || searchInput !== search
             ? null
@@ -95,7 +97,8 @@ function ListPageContent({ listId }: ListPageContentProps) {
         isMutatingItems ||
         isLoading ||
         searchInput !== search;
-    const bulkActionsDisabled = itemActionsDisabled || Boolean(pageError);
+    const bulkActionsDisabled =
+        itemActionsDisabled || Boolean(pageError) || Boolean(itemMutationError);
 
     useEffect(() => {
         clearMutationError();
@@ -213,9 +216,12 @@ function ListPageContent({ listId }: ListPageContentProps) {
             <ListItems
                 disabled={itemActionsDisabled}
                 emptyMessage={itemsEmptyMessage}
+                errorItemId={mutationErrorItemId}
+                itemError={itemMutationError}
                 items={items}
                 listName={list.name}
                 unitLabel={list.unitLabel}
+                onReloadItemError={reloadListPage}
                 onItemCompletedChange={handleItemCompletedChange}
                 onEditItem={openEditModal}
                 onDeleteItem={openDeleteModal}

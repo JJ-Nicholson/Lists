@@ -79,11 +79,14 @@ export default function ListPreview() {
             <ListItems
                 disabled
                 emptyMessage="No entries yet"
+                errorItemId={null}
+                itemError=""
                 items={previewItems}
                 listName={previewListName}
                 onDeleteItem={handlePreviewAction}
                 onEditItem={handlePreviewAction}
                 onItemCompletedChange={handlePreviewAction}
+                onReloadItemError={handlePreviewAction}
                 unitLabel={previewUnitLabel}
             />
 

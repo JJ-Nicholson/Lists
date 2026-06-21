@@ -3,21 +3,25 @@ import { Button } from "../Button";
 import { formatListAmount } from "./amountFormat";
 
 type ListItemRowProps = {
-    disabled?: boolean;
+    disabled: boolean;
+    error: string;
     item: ListItem;
     unitLabel?: string | null;
     onCompletedChange: (itemId: number) => void;
-    onEditItem?: (item: ListItem) => void;
-    onDeleteItem?: (item: ListItem) => void;
+    onEditItem: (item: ListItem) => void;
+    onDeleteItem: (item: ListItem) => void;
+    onReloadError: () => void;
 };
 
 export default function ListItemRow({
-    disabled = false,
+    disabled,
+    error,
     item,
     unitLabel,
     onCompletedChange,
-    onEditItem = () => {},
-    onDeleteItem = () => {},
+    onEditItem,
+    onDeleteItem,
+    onReloadError,
 }: ListItemRowProps) {
     const isCompleted = item.isCompleted;
 
@@ -25,7 +29,7 @@ export default function ListItemRow({
         <article
             className={`list-item-row${
                 isCompleted ? " list-item-row--completed" : ""
-            }`}
+            }${error ? " list-item-row--error" : ""}`}
         >
             <label className="list-item-row__checkbox">
                 <span className="visually-hidden">
@@ -63,6 +67,15 @@ export default function ListItemRow({
                     Delete
                 </Button>
             </div>
+
+            {error && (
+                <div className="list-item-row__error">
+                    <p className="list-item-row__error-message" role="alert">
+                        {error}
+                    </p>
+                    <Button onClick={onReloadError}>Reload List</Button>
+                </div>
+            )}
         </article>
     );
 }

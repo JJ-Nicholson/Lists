@@ -6,7 +6,7 @@ type ListTotalProps = {
     unitLabel?: string | null;
 };
 
-function getTotalLabel(isFiltered = false): string {
+function getTotalLabel(isFiltered: boolean): string {
     return isFiltered ? "Filtered Total" : "Total";
 }
 

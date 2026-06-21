@@ -990,6 +990,11 @@ a.highlight:active {
     cursor: default;
 }
 
+.list-item-row--error .list-item-row__checkbox input:disabled,
+.list-item-row--error .list-item-row__actions .button:disabled {
+    opacity: 0.55;
+}
+
 .list-item-row__name {
     grid-area: name;
     min-width: 0;
@@ -1014,6 +1019,19 @@ a.highlight:active {
     grid-area: actions;
     justify-self: end;
     gap: 1rem;
+}
+
+.list-item-row__error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-column: 1 / -1;
+    gap: 1rem;
+}
+
+.list-item-row__error-message {
+    color: var(--danger-base);
+    font-weight: var(--font-weight-bold);
 }
 
 .list-total {
@@ -1135,6 +1153,33 @@ a.highlight:active {
         flex-direction: column;
     }
 
+    .list-header__actions {
+        display: contents;
+    }
+
+    .list-header__back-button {
+        display: none;
+    }
+
+    .list-header__add-button {
+        position: fixed;
+        z-index: 10;
+        right: max(2rem, env(safe-area-inset-right));
+        bottom: max(2rem, env(safe-area-inset-bottom));
+        width: max(7.2rem, 56px);
+        min-height: max(7.2rem, 56px);
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+        box-shadow: 0 0.8rem 2rem rgba(23, 18, 15, 0.24);
+    }
+
+    .list-header__add-button::before {
+        content: "+";
+        font-size: var(--font-size-huge);
+        line-height: 1;
+    }
+
     .lists__grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -1196,6 +1241,11 @@ a.highlight:active {
 
     .list-item-row__actions .button {
         flex: 1 1 0;
+    }
+
+    .list-item-row__error {
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .page-error {

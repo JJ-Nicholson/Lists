@@ -2,6 +2,8 @@ import { ApiError } from "./client";
 
 const RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE =
     "Reload the list to see what changed before making further changes.";
+const RELOAD_LIST_BEFORE_RETRYING_BULK_ACTION_MESSAGE =
+    "Reload the list to review what changed before trying this bulk action again.";
 const RELOAD_TO_REVIEW_CHANGES_MESSAGE =
     "Reload to see what changed before making further changes.";
 const LIST_UNAVAILABLE_MESSAGE =
@@ -14,16 +16,16 @@ const ITEM_MODIFIED_MESSAGE =
     RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE;
 const BULK_ITEMS_MODIFIED_MESSAGE =
     "One or more entries have been modified since you last checked. " +
-    RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE;
+    RELOAD_LIST_BEFORE_RETRYING_BULK_ACTION_MESSAGE;
 const BULK_ITEMS_DELETED_MESSAGE =
     "One or more entries may have been deleted since you last checked. " +
-    RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE;
+    RELOAD_LIST_BEFORE_RETRYING_BULK_ACTION_MESSAGE;
 const BULK_ITEMS_ALREADY_COMPLETED_MESSAGE =
     "One or more entries have already been completed since you last checked. " +
-    RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE;
+    RELOAD_LIST_BEFORE_RETRYING_BULK_ACTION_MESSAGE;
 const BULK_ITEMS_ALREADY_INCOMPLETE_MESSAGE =
     "One or more entries have already been marked incomplete since you last checked. " +
-    RELOAD_LIST_TO_REVIEW_CHANGES_MESSAGE;
+    RELOAD_LIST_BEFORE_RETRYING_BULK_ACTION_MESSAGE;
 const LIST_MODIFIED_MESSAGE =
     "This list has been modified since you last checked. " +
     RELOAD_TO_REVIEW_CHANGES_MESSAGE;

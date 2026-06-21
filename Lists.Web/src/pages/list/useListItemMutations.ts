@@ -24,6 +24,7 @@ type UseListItemMutationsResult = {
     clearMutationError: () => void;
     isMutatingItems: boolean;
     mutationError: string;
+    mutationErrorItemId: number | null;
     handleItemCompletedChange: (itemId: number) => Promise<void>;
     handleMarkAllItemsComplete: () => Promise<void>;
     handleMarkAllItemsIncomplete: () => Promise<void>;
@@ -38,9 +39,13 @@ export function useListItemMutations({
     const getAccessToken = useAccessToken();
     const [isMutatingItems, setIsMutatingItems] = useState(false);
     const [mutationError, setMutationError] = useState("");
+    const [mutationErrorItemId, setMutationErrorItemId] = useState<number | null>(
+        null,
+    );
 
     const clearMutationError = useCallback((): void => {
         setMutationError("");
+        setMutationErrorItemId(null);
     }, []);
 
     async function handleItemCompletedChange(itemId: number): Promise<void> {
@@ -52,6 +57,7 @@ export function useListItemMutations({
 
         setIsMutatingItems(true);
         setMutationError("");
+        setMutationErrorItemId(null);
 
         try {
             const accessToken = await getAccessToken();
@@ -76,6 +82,7 @@ export function useListItemMutations({
             setMutationError(
                 getItemActionErrorMessage(error, "Could not update list entry."),
             );
+            setMutationErrorItemId(itemId);
         } finally {
             setIsMutatingItems(false);
         }
@@ -159,6 +166,7 @@ export function useListItemMutations({
         clearMutationError,
         isMutatingItems,
         mutationError,
+        mutationErrorItemId,
         handleItemCompletedChange,
         handleMarkAllItemsComplete,
         handleMarkAllItemsIncomplete,

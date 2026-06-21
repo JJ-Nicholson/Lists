@@ -2,16 +2,16 @@ import { Button, ButtonLink } from "../Button";
 
 type ListHeaderProps = {
     addItemDisabled?: boolean;
-    disabled?: boolean;
+    disabled: boolean;
     listName: string;
-    onAddItem?: () => void;
+    onAddItem: () => void;
 };
 
 export default function ListHeader({
     addItemDisabled = false,
-    disabled = false,
+    disabled,
     listName,
-    onAddItem = () => {},
+    onAddItem,
 }: ListHeaderProps) {
     const isAddItemDisabled = disabled || addItemDisabled;
 
@@ -23,13 +23,24 @@ export default function ListHeader({
                 <h1 className="heading heading--small list__name">{listName}</h1>
                 <div className="list-header__actions">
                     {disabled ? (
-                        <Button disabled variant="disabled">
+                        <Button
+                            className="list-header__back-button"
+                            disabled
+                            variant="disabled"
+                        >
                             Back to Lists
                         </Button>
                     ) : (
-                        <ButtonLink to="/lists">Back to Lists</ButtonLink>
+                        <ButtonLink
+                            className="list-header__back-button"
+                            to="/lists"
+                        >
+                            Back to Lists
+                        </ButtonLink>
                     )}
                     <Button
+                        aria-label="Add Entry"
+                        className="list-header__add-button"
                         disabled={isAddItemDisabled}
                         onClick={onAddItem}
                         variant={isAddItemDisabled ? "disabled" : "default"}

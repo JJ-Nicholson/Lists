@@ -10,18 +10,18 @@ import { getAmountSortLabel } from "./amountLabels";
 
 type ListControlsProps = {
     bulkActionsDisabled?: boolean;
-    disabled?: boolean;
-    hasCompletedItems?: boolean;
-    hasIncompleteItems?: boolean;
+    disabled: boolean;
+    hasCompletedItems: boolean;
+    hasIncompleteItems: boolean;
     idPrefix?: string;
     isFiltered?: boolean;
     unitLabel?: string | null;
-    onSearchChange?: (value: string) => void;
-    onStatusChange?: (value: ItemStatus) => void;
-    onSortByChange?: (value: ItemSort) => void;
-    onSortDirectionChange?: (value: SortDirection) => void;
-    onMarkAllItemsComplete?: () => void;
-    onMarkAllItemsIncomplete?: () => void;
+    onSearchChange: (value: string) => void;
+    onStatusChange: (value: ItemStatus) => void;
+    onSortByChange: (value: ItemSort) => void;
+    onSortDirectionChange: (value: SortDirection) => void;
+    onMarkAllItemsComplete: () => void;
+    onMarkAllItemsIncomplete: () => void;
     search?: string;
     status?: ItemStatus;
     sortBy?: ItemSort;
@@ -30,18 +30,18 @@ type ListControlsProps = {
 
 export default function ListControls({
     bulkActionsDisabled = false,
-    disabled = false,
-    hasCompletedItems = false,
-    hasIncompleteItems = false,
+    disabled,
+    hasCompletedItems,
+    hasIncompleteItems,
     idPrefix = "list",
     isFiltered = false,
     unitLabel,
-    onSearchChange = () => {},
-    onStatusChange = () => {},
-    onSortByChange = () => {},
-    onSortDirectionChange = () => {},
-    onMarkAllItemsComplete = () => {},
-    onMarkAllItemsIncomplete = () => {},
+    onSearchChange,
+    onStatusChange,
+    onSortByChange,
+    onSortDirectionChange,
+    onMarkAllItemsComplete,
+    onMarkAllItemsIncomplete,
     search = "",
     status = "all",
     sortBy = "name",
