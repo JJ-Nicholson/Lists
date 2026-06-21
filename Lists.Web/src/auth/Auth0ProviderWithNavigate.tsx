@@ -33,6 +33,7 @@ export default function Auth0ProviderWithNavigate({
             clientId={auth0ClientId}
             domain={auth0Domain}
             onRedirectCallback={onRedirectCallback}
+            useCookiesForTransactions
         >
             {children}
         </Auth0Provider>
