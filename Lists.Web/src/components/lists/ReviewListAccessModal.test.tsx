@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { buildApiUrl } from "../../api/client";
 import type { ListAccessEntry, ListSummary } from "../../api/lists";
@@ -163,7 +163,7 @@ describe("ReviewListAccessModal", () => {
         });
     });
 
-    it("shows a load error", async () => {
+    it("offers to reload lists when the list is unavailable", async () => {
         const list = createList();
         server.use(
             http.get(accessUrl(list.id), () => {
@@ -185,5 +185,104 @@ describe("ReviewListAccessModal", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent(
             "This list does not exist, was deleted, or you no longer have access.",
         );
+        expect(
+            screen.getByRole("button", { name: "Reload Lists" }),
+        ).toBeInTheDocument();
+    });
+
+    it("retries access loading after an ordinary load error", async () => {
+        const list = createList();
+        let requestCount = 0;
+        server.use(
+            http.get(accessUrl(list.id), () => {
+                requestCount += 1;
+
+                return requestCount === 1
+                    ? HttpResponse.text("Nope", { status: 500 })
+                    : HttpResponse.json([
+                          { username: "josh", role: "owner" },
+                      ]);
+            }),
+        );
+        const { user } = render(
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={reloadList}
+            />,
+        );
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Failed to load list access.",
+        );
+        await user.click(screen.getByRole("button", { name: "Reload" }));
+
+        expect(await screen.findByText("josh")).toBeInTheDocument();
+        expect(requestCount).toBe(2);
+    });
+
+    it("reloads access after the list becomes available", async () => {
+        const list = createList();
+        const onReloadList = vi.fn(async () => true);
+        let requestCount = 0;
+        server.use(
+            http.get(accessUrl(list.id), () => {
+                requestCount += 1;
+
+                return requestCount === 1
+                    ? HttpResponse.json(
+                          { message: "List not found." },
+                          { status: 404 },
+                      )
+                    : HttpResponse.json([
+                          { username: "josh", role: "owner" },
+                      ]);
+            }),
+        );
+        const { user } = render(
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={onReloadList}
+            />,
+        );
+
+        await user.click(
+            await screen.findByRole("button", { name: "Reload Lists" }),
+        );
+
+        expect(onReloadList).toHaveBeenCalledWith(list);
+        expect(await screen.findByText("josh")).toBeInTheDocument();
+        expect(requestCount).toBe(2);
+    });
+
+    it("keeps list reload available when reloading fails", async () => {
+        const list = createList();
+        server.use(
+            http.get(accessUrl(list.id), () => {
+                return HttpResponse.json(
+                    { message: "List not found." },
+                    { status: 404 },
+                );
+            }),
+        );
+        const { user } = render(
+            <ReviewListAccessModal
+                list={list}
+                onClose={() => {}}
+                onReloadList={() => Promise.reject(new Error("Nope"))}
+            />,
+        );
+
+        await user.click(
+            await screen.findByRole("button", { name: "Reload Lists" }),
+        );
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Could not reload lists.",
+        );
+        expect(
+            screen.getByRole("button", { name: "Reload Lists" }),
+        ).toBeInTheDocument();
     });
 });

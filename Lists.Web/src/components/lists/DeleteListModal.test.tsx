@@ -21,6 +21,17 @@ function createList(overrides: Partial<ListSummary> = {}): ListSummary {
     };
 }
 
+function mockDeleteConflict(list: ListSummary): void {
+    server.use(
+        http.delete(buildApiUrl(`/lists/${list.id}`).toString(), () => {
+            return HttpResponse.json(
+                { message: "List was modified. Reload and try again." },
+                { status: 409 },
+            );
+        }),
+    );
+}
+
 describe("DeleteListModal", () => {
     it("renders the confirmation text", () => {
         render(
@@ -94,5 +105,86 @@ describe("DeleteListModal", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent(
             "Only list owners can delete lists.",
         );
+    });
+
+    it("offers to reload after a concurrency error", async () => {
+        const list = createList();
+        const onReloadList = vi.fn(async () => undefined);
+        mockDeleteConflict(list);
+        const { user } = render(
+            <DeleteListModal
+                list={list}
+                onClose={() => {}}
+                onListDeleted={() => {}}
+                onReloadList={onReloadList}
+            />,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Delete" }));
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "This list has been modified since you last checked.",
+        );
+        expect(
+            screen.queryByRole("button", { name: "Delete" }),
+        ).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Reload Lists" }));
+
+        expect(onReloadList).toHaveBeenCalledWith(list);
+    });
+
+    it("keeps reload available when reloading fails", async () => {
+        const list = createList();
+        mockDeleteConflict(list);
+        const { user } = render(
+            <DeleteListModal
+                list={list}
+                onClose={() => {}}
+                onListDeleted={() => {}}
+                onReloadList={() => Promise.reject(new Error("Nope"))}
+            />,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Delete" }));
+        await user.click(
+            await screen.findByRole("button", { name: "Reload Lists" }),
+        );
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Could not reload list.",
+        );
+        expect(
+            screen.getByRole("button", { name: "Reload Lists" }),
+        ).toBeInTheDocument();
+    });
+
+    it("treats a missing list as already deleted", async () => {
+        const list = createList();
+        const onClose = vi.fn();
+        const onListDeleted = vi.fn();
+        server.use(
+            http.delete(buildApiUrl(`/lists/${list.id}`).toString(), () => {
+                return HttpResponse.json(
+                    { message: "List not found." },
+                    { status: 404 },
+                );
+            }),
+        );
+        const { user } = render(
+            <DeleteListModal
+                list={list}
+                onClose={onClose}
+                onListDeleted={onListDeleted}
+                onReloadList={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Delete" }));
+
+        await waitFor(() => {
+            expect(onClose).toHaveBeenCalledOnce();
+        });
+        expect(onListDeleted).toHaveBeenCalledOnce();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 });

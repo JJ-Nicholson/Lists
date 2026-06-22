@@ -21,6 +21,17 @@ function createList(overrides: Partial<ListSummary> = {}): ListSummary {
     };
 }
 
+function mockUpdateConflict(list: ListSummary): void {
+    server.use(
+        http.patch(buildApiUrl(`/lists/${list.id}`).toString(), () => {
+            return HttpResponse.json(
+                { message: "List was modified. Reload and try again." },
+                { status: 409 },
+            );
+        }),
+    );
+}
+
 describe("EditListModal", () => {
     it("validates a blank list name", async () => {
         const { user } = render(
@@ -87,22 +98,16 @@ describe("EditListModal", () => {
         ]);
     });
 
-    it("shows an API error", async () => {
+    it("offers to reload after a concurrency error", async () => {
         const list = createList();
-        server.use(
-            http.patch(buildApiUrl(`/lists/${list.id}`).toString(), () => {
-                return HttpResponse.json(
-                    { message: "List was modified. Reload and try again." },
-                    { status: 409 },
-                );
-            }),
-        );
+        const onReloadList = vi.fn(async () => undefined);
+        mockUpdateConflict(list);
         const { user } = render(
             <EditListModal
                 list={list}
                 onClose={() => {}}
                 onListUpdated={() => {}}
-                onReloadList={() => {}}
+                onReloadList={onReloadList}
             />,
         );
 
@@ -112,5 +117,37 @@ describe("EditListModal", () => {
             "This list has been modified since you last checked. " +
                 "Reload to see what changed before making further changes.",
         );
+        expect(
+            screen.queryByRole("button", { name: "Save" }),
+        ).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Reload Lists" }));
+
+        expect(onReloadList).toHaveBeenCalledWith(list);
+    });
+
+    it("keeps reload available when reloading fails", async () => {
+        const list = createList();
+        mockUpdateConflict(list);
+        const { user } = render(
+            <EditListModal
+                list={list}
+                onClose={() => {}}
+                onListUpdated={() => {}}
+                onReloadList={() => Promise.reject(new Error("Nope"))}
+            />,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Save" }));
+        await user.click(
+            await screen.findByRole("button", { name: "Reload Lists" }),
+        );
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Could not reload list.",
+        );
+        expect(
+            screen.getByRole("button", { name: "Reload Lists" }),
+        ).toBeInTheDocument();
     });
 });
