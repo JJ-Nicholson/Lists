@@ -6,11 +6,13 @@ type HeaderMap = Record<string, string>;
 
 export class ApiError extends Error {
   status: number;
+  code?: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -38,31 +40,46 @@ export function buildHeaders(
   };
 }
 
-function getJsonMessage(body: unknown) {
-  if (typeof body !== "object" || body === null || !("message" in body)) {
-    return undefined;
+type ErrorDetails = {
+  code?: string;
+  message?: string;
+};
+
+function getJsonErrorDetails(body: unknown): ErrorDetails {
+  if (typeof body !== "object" || body === null) {
+    return {};
   }
 
-  const message = body.message;
+  const message = "message" in body ? body.message : undefined;
+  const code = "code" in body ? body.code : undefined;
 
-  return typeof message === "string" && message.trim()
-    ? message
-    : undefined;
+  return {
+    code: typeof code === "string" && code.trim() ? code : undefined,
+    message:
+      typeof message === "string" && message.trim() ? message : undefined,
+  };
 }
 
-async function getErrorMessage(response: Response, fallbackMessage: string) {
+async function getErrorDetails(
+  response: Response,
+  fallbackMessage: string,
+): Promise<ErrorDetails> {
   const contentType = response.headers.get("content-type") ?? "";
 
   if (!contentType.includes("application/json")) {
-    return fallbackMessage;
+    return { message: fallbackMessage };
   }
 
   try {
     const errorBody: unknown = await response.json();
+    const details = getJsonErrorDetails(errorBody);
 
-    return getJsonMessage(errorBody) ?? fallbackMessage;
+    return {
+      ...details,
+      message: details.message ?? fallbackMessage,
+    };
   } catch {
-    return fallbackMessage;
+    return { message: fallbackMessage };
   }
 }
 
@@ -74,7 +91,7 @@ export async function throwIfResponseNotOk(
     return;
   }
 
-  const message = await getErrorMessage(response, fallbackMessage);
+  const { code, message } = await getErrorDetails(response, fallbackMessage);
 
-  throw new ApiError(message, response.status);
+  throw new ApiError(message ?? fallbackMessage, response.status, code);
 }

@@ -1,4 +1,11 @@
-import { buildApiUrl, buildHeaders, throwIfResponseNotOk } from "./client";
+import {
+    ApiError,
+    buildApiUrl,
+    buildHeaders,
+    throwIfResponseNotOk,
+} from "./client";
+
+const ACCOUNT_DELETION_INCOMPLETE_CODE = "account_deletion_incomplete";
 
 export type User = {
     username: string | null;
@@ -50,4 +57,8 @@ export async function deleteCurrentUser(
     });
 
     await throwIfResponseNotOk(response, "Failed to delete user.");
+}
+
+export function isAccountDeletionIncompleteError(error: unknown): boolean {
+    return error instanceof ApiError && error.code === ACCOUNT_DELETION_INCOMPLETE_CODE;
 }

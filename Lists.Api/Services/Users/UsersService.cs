@@ -89,15 +89,27 @@ public class UsersService(
 
         await auth0ManagementService.DeleteUserAsync(auth0UserId, cancellationToken);
 
-        var deletedListCount = await unitOfWork.Lists.DeleteOwnedListEntitiesAsync(user.Id, cancellationToken);
+        try
+        {
+            var deletedListCount = await unitOfWork.Lists.DeleteOwnedListEntitiesAsync(user.Id, cancellationToken);
 
-        unitOfWork.Users.DeleteUserEntity(user);
+            unitOfWork.Users.DeleteUserEntity(user);
 
-        await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.SaveAsync(cancellationToken);
 
-        logger.LogInformation(
-            "Deleted account {UserId} and {DeletedListCount} owned lists.",
-            user.Id,
-            deletedListCount);
+            logger.LogInformation(
+                "Deleted account {UserId} and {DeletedListCount} owned lists.",
+                user.Id,
+                deletedListCount);
+        }
+        catch (Exception exception)
+        {
+            logger.LogCritical(
+                exception,
+                "Auth0 account was deleted, but local account deletion failed for user {UserId}.",
+                user.Id);
+
+            throw new AccountDeletionIncompleteException(exception);
+        }
     }
 }

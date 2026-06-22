@@ -14,10 +14,16 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             return false;
         }
 
-        var (statusCode, message) = exception switch
+        var (statusCode, message, code) = exception switch
         {
-            ApiException apiException => (apiException.StatusCode, apiException.Message),
-            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+            ApiException apiException => (
+                apiException.StatusCode,
+                apiException.Message,
+                apiException.Code),
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "An unexpected error occurred.",
+                null)
         };
 
         if (statusCode == StatusCodes.Status500InternalServerError)
@@ -26,7 +32,15 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         }
 
         httpContext.Response.StatusCode = statusCode;
-        await httpContext.Response.WriteAsJsonAsync(new { message }, cancellationToken);
+
+        if (code is null)
+        {
+            await httpContext.Response.WriteAsJsonAsync(new { message }, cancellationToken);
+        }
+        else
+        {
+            await httpContext.Response.WriteAsJsonAsync(new { message, code }, cancellationToken);
+        }
 
         return true;
     }

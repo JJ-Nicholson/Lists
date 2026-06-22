@@ -77,12 +77,10 @@ describe("Header", () => {
         });
     });
 
-    it("renders authenticated actions and logs out", async () => {
-        const logout = vi.fn(async () => undefined);
-        const { user } = render(<Header />, {
+    it("renders authenticated navigation", () => {
+        render(<Header />, {
             auth0: {
                 isAuthenticated: true,
-                logout,
             },
         });
 
@@ -90,13 +88,7 @@ describe("Header", () => {
             .toHaveAttribute("href", "/lists");
         expect(screen.getByRole("link", { name: "Your Lists" }))
             .toHaveAttribute("href", "/lists");
-
-        await user.click(screen.getByRole("button", { name: "Logout" }));
-
-        expect(logout).toHaveBeenCalledWith({
-            logoutParams: {
-                returnTo: window.location.origin,
-            },
-        });
+        expect(screen.getByRole("link", { name: "Profile" }))
+            .toHaveAttribute("href", "/profile");
     });
 });

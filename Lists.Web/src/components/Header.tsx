@@ -51,7 +51,6 @@ export default function Header(): ReactElement {
         isAuthenticated,
         isLoading,
         loginWithRedirect,
-        logout: auth0Logout,
     } = useAuth0();
     const location = useLocation();
     const brandTo = isAuthenticated ? "/lists" : "/";
@@ -66,12 +65,6 @@ export default function Header(): ReactElement {
         loginWithRedirect({
             appState: { returnTo: "/lists" },
             authorizationParams: { screen_hint: "signup" },
-        });
-    }
-
-    function logout(): void {
-        auth0Logout({
-            logoutParams: { returnTo: window.location.origin },
         });
     }
 
@@ -147,9 +140,9 @@ export default function Header(): ReactElement {
                         <ButtonLink to="/lists" variant="header">
                             Your Lists
                         </ButtonLink>
-                        <Button onClick={logout} variant="header">
-                            Logout
-                        </Button>
+                        <ButtonLink to="/profile" variant="header">
+                            Profile
+                        </ButtonLink>
                     </>
                 ) : (
                     <>

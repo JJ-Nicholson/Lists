@@ -104,7 +104,7 @@ export default function CreateItemModal({
                 </Button>
             }
             className="create-item-modal"
-            isOpen
+            isOpen={true}
             onClose={isSubmitting ? undefined : closeCreateModal}
             title="Add Entry"
         >

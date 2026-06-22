@@ -1054,7 +1054,7 @@ a.highlight:active {
     font-weight: var(--font-weight-bold);
 }
 
-/* ------ DEFAULT CONTENT PAGES (PRIVACY, NOT FOUND, SETUP PROFILE) ------ */
+/* ------ DEFAULT CONTENT PAGES (PRIVACY, NOT FOUND, SETUP PROFILE, PROFILE) ------ */
 .content-page {
     display: flex;
     flex-direction: column;
@@ -1082,6 +1082,17 @@ a.highlight:active {
 
 .profile-setup__form {
     width: min(100%, 42rem);
+}
+
+/* ------ PROFILE ------ */
+.profile__heading {
+    overflow-wrap: anywhere;
+}
+
+.profile__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 /* ----------------------- MEDIA QUERIES ----------------------- */

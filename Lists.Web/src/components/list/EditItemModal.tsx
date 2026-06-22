@@ -136,7 +136,7 @@ export default function EditItemModal({
                 )
             }
             className="edit-item-modal"
-            isOpen
+            isOpen={true}
             onClose={isSubmitting ? undefined : closeEditModal}
             title="Edit Entry"
         >

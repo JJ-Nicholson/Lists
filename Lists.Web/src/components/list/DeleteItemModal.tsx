@@ -104,7 +104,7 @@ export default function DeleteItemModal({
                 )
             }
             className="delete-item-modal"
-            isOpen
+            isOpen={true}
             onClose={isSubmitting ? undefined : closeDeleteModal}
             title="Delete Entry"
         >
