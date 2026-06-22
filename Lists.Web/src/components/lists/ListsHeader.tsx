@@ -15,7 +15,12 @@ export default function ListsHeader({
 
             <div className="page__header-row">
                 <h1 className="heading heading--small">Your Lists</h1>
-                <Button disabled={disabled} onClick={onCreateList}>
+                <Button
+                    aria-label="Create List"
+                    className="page__header-primary-action"
+                    disabled={disabled}
+                    onClick={onCreateList}
+                >
                     Create List
                 </Button>
             </div>

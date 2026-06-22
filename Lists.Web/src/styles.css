@@ -1148,20 +1148,7 @@ a.highlight:active {
         min-height: auto;
     }
 
-    .page__header-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .list-header__actions {
-        display: contents;
-    }
-
-    .list-header__back-button {
-        display: none;
-    }
-
-    .list-header__add-button {
+    .page__header-primary-action {
         position: fixed;
         z-index: 10;
         right: max(2rem, env(safe-area-inset-right));
@@ -1174,10 +1161,18 @@ a.highlight:active {
         box-shadow: 0 0.8rem 2rem rgba(23, 18, 15, 0.24);
     }
 
-    .list-header__add-button::before {
+    .page__header-primary-action::before {
         content: "+";
         font-size: var(--font-size-huge);
         line-height: 1;
+    }
+
+    .list-header__actions {
+        display: contents;
+    }
+
+    .list-header__back-button {
+        display: none;
     }
 
     .lists__grid {

@@ -40,7 +40,7 @@ export default function ListHeader({
                     )}
                     <Button
                         aria-label="Add Entry"
-                        className="list-header__add-button"
+                        className="page__header-primary-action"
                         disabled={isAddItemDisabled}
                         onClick={onAddItem}
                         variant={isAddItemDisabled ? "disabled" : "default"}
