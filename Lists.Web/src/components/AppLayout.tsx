@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet, useLocation } from "react-router";
 
 import { scrollToPageTop } from "../navigation/scroll";
@@ -27,7 +27,9 @@ export default function AppLayout() {
 
             <main className={`page page--${variant}`}>
                 <section className={`page__container page__container--${variant}`}>
-                    <Outlet />
+                    <Suspense fallback={<p>Loading...</p>}>
+                        <Outlet />
+                    </Suspense>
                 </section>
             </main>
 

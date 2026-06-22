@@ -1,16 +1,18 @@
+import { lazy } from "react";
 import { Routes, Route } from "react-router";
 
 import RequireAuth from "./auth/RequireAuth";
 import RequireUsername from "./auth/RequireUsername";
 import AppLayout from "./components/AppLayout";
-import AuthCallbackPage from "./pages/AuthCallbackPage";
-import HomePage from "./pages/HomePage";
-import ListPage from "./pages/list/ListPage";
-import ListsPage from "./pages/lists/ListsPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import ProfilePage from "./pages/ProfilePage";
-import SetupProfilePage from "./pages/SetupProfilePage";
+
+const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ListPage = lazy(() => import("./pages/list/ListPage"));
+const ListsPage = lazy(() => import("./pages/lists/ListsPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const SetupProfilePage = lazy(() => import("./pages/SetupProfilePage"));
 
 export default function App() {
     return (

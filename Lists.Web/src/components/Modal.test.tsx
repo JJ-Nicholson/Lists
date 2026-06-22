@@ -18,7 +18,7 @@ describe("Modal", () => {
         render(
             <Modal
                 actions={<button type="button">Save</button>}
-                isOpen
+                isOpen={true}
                 title="Edit List"
             >
                 Modal content
@@ -38,7 +38,7 @@ describe("Modal", () => {
 
     it("uses an aria label when there is no title", () => {
         render(
-            <Modal ariaLabel="Review access" isOpen>
+            <Modal ariaLabel="Review access" isOpen={true}>
                 Access content
             </Modal>,
         );
@@ -54,7 +54,7 @@ describe("Modal", () => {
     it("calls onClose from the close button, backdrop, and Escape", async () => {
         const onClose = vi.fn();
         const { user } = render(
-            <Modal isOpen onClose={onClose} title="Edit List">
+            <Modal isOpen={true} onClose={onClose} title="Edit List">
                 Modal content
             </Modal>,
         );
