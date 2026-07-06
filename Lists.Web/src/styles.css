@@ -1161,14 +1161,14 @@ a.highlight:active {
     }
 
     .page--home .home__previews-container {
-        padding: 6rem;
+        padding: 5rem;
     }
 
     .page--home .home__previews-container .page__header-primary-action {
         position: absolute;
         z-index: 2;
-        right: 2rem;
-        bottom: 2rem;
+        right: 1.8rem;
+        bottom: 1.8rem;
         width: max(6.4rem, 48px);
         min-height: max(6.4rem, 48px);
         padding: 0;

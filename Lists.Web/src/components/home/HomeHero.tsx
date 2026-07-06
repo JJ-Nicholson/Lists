@@ -36,7 +36,7 @@ export default function HomeHero() {
                 <span className="underline">share</span> all your lists in one
                 place. It is free to use, with no ads and no distractions. Plan
                 together, keep up with changes, and stay organised down to the
-                last detail. See exactly how Lists will look on this device
+                last detail. See how Lists will look on this device
                 below, read the{" "}
                 <Link className="highlight" to="/privacy">
                     privacy policy
