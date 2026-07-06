@@ -814,6 +814,7 @@ a.highlight:active {
 
 /* HOME PREVIEWS */
 .home__previews-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 3rem;
@@ -1157,6 +1158,29 @@ a.highlight:active {
 
     .home__cta {
         min-height: auto;
+    }
+
+    .page--home .home__previews-container {
+        padding: 6rem;
+    }
+
+    .page--home .home__previews-container .page__header-primary-action {
+        position: absolute;
+        z-index: 2;
+        right: 2rem;
+        bottom: 2rem;
+        width: max(6.4rem, 48px);
+        min-height: max(6.4rem, 48px);
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+        box-shadow: 0 0.8rem 2rem rgba(23, 18, 15, 0.24);
+    }
+
+    .page--home .home__previews-container .page__header-primary-action::before {
+        content: "+";
+        font-size: var(--font-size-huge);
+        line-height: 1;
     }
 
     .page--lists .page__header-primary-action,
