@@ -1,4 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /src
 
 RUN dotnet tool install --global dotnet-ef --version 10.0.8
@@ -22,6 +27,11 @@ RUN dotnet publish Lists.Api/Lists.Api.csproj \
     --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=build /app/publish .
